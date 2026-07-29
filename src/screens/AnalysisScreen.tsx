@@ -9,10 +9,11 @@ interface AnalysisScreenProps {
   activity: ActivityId;
   topImage: string;
   sideImage: string;
+  manualMeasurement?: { footLengthCm: number; footWidthCm: number; pixelsPerCm: number } | null;
   onComplete: (result: AnalysisResult) => void;
 }
 
-export default function AnalysisScreen({ activity, topImage, sideImage, onComplete }: AnalysisScreenProps) {
+export default function AnalysisScreen({ activity, topImage, sideImage, manualMeasurement, onComplete }: AnalysisScreenProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +24,8 @@ export default function AnalysisScreen({ activity, topImage, sideImage, onComple
   useEffect(() => {
     let cancelled = false;
 
-    runAnalysis(activity, topImage, sideImage)
+    runAnalysis(activity, topImage, sideImage, manualMeasurement ?? undefined)
+
       .then((result) => {
         if (cancelled) return;
         resultRef.current = result;
