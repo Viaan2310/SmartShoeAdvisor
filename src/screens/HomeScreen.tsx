@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Motion } from '@/components/Animation';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
-import { Moon, Sun, Scan, Ruler, Footprints, Sparkles, Star, Activity as ActivityIcon, Zap, ArrowRight, LogOut, History, Trash2, Calendar, Brain, GitCompare, X, TrendingUp, TrendingDown, Minus, MessageSquare, Send, Shield } from 'lucide-react';
+import { Moon, Sun, Scan, Ruler, Footprints, Sparkles, Star, Activity as ActivityIcon, Zap, ArrowRight, LogOut, History, Trash2, Calendar, Brain, GitCompare, X, TrendingUp, TrendingDown, Minus, MessageSquare, Send, Shield, Check } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { loadHistory, deleteAnalysis, type SavedAnalysis } from '@/lib/history';
 import { getUserRating, saveUserRating, getRatingStats, type AppRating } from '@/lib/ratings';
