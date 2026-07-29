@@ -66,7 +66,7 @@ export default function AnalysisScreen({ activity, topImage, sideImage, manualMe
       cancelled = true;
       clearInterval(timer);
     };
-  }, [activity, topImage, sideImage, onComplete]);
+  }, [activity, topImage, sideImage, manualMeasurement, onComplete]);
 
   const radius = 70;
   const circumference = 2 * Math.PI * radius;
