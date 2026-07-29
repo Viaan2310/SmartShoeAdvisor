@@ -147,13 +147,24 @@ function calculateConfidence(metrics: ImageAnalysis): number {
   return Math.min(Math.max(Math.round(confidence), 82), 99);
 }
 
-// Run the full analysis pipeline using real image pixel data
+// Run the full analysis pipeline using real image pixel data.
+// An optional `manual` override supplies user-calibrated measurements from CalibrationScreen.
 export async function runAnalysis(
   activity: ActivityId,
   topImage: string,
   sideImage: string,
+  manual?: { footLengthCm: number; footWidthCm: number; pixelsPerCm: number },
 ): Promise<AnalysisResult> {
   const imageAnalysis: ImageAnalysis = await analyzeFootImages(topImage, sideImage);
+  // Apply manual overrides if provided — these come from the user's own drag-drop calibration.
+  if (manual) {
+    imageAnalysis.footLengthCm = manual.footLengthCm;
+    imageAnalysis.footWidthCm = manual.footWidthCm;
+    imageAnalysis.pixelsPerCm = manual.pixelsPerCm;
+    imageAnalysis.rulerDetected = true;
+    imageAnalysis.widthRatio = manual.footLengthCm > 0 ? manual.footWidthCm / manual.footLengthCm : imageAnalysis.widthRatio;
+    imageAnalysis.measurementConfidence = 100;
+  }
   const footType = imageAnalysis.footType;
   const ftInfo = footTypes[footType];
 
@@ -162,10 +173,10 @@ export async function runAnalysis(
   let rulerDetected = imageAnalysis.rulerDetected;
   if (!rulerDetected || footLengthCm <= 0 || footLengthCm > 40) {
     // Fallback: estimate from foot width ratio (correlated with length) — clearly marked as estimate
-    // Adult foot length ~ 22-30cm, estimated from width ratio
     footLengthCm = 22 + imageAnalysis.widthRatio * 18;
     rulerDetected = false;
   }
+
   const sizes = lengthToSizes(footLengthCm);
 
   const { primary, alternatives } = pickBestShoe(activity, footType, imageAnalysis);

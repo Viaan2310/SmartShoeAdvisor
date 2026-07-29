@@ -5,6 +5,7 @@ import SplashScreen from '@/screens/SplashScreen';
 import AuthScreen from '@/screens/AuthScreen';
 import HomeScreen from '@/screens/HomeScreen';
 import UploadScreen from '@/screens/UploadScreen';
+import CalibrationScreen, { type ManualMeasurement } from '@/screens/CalibrationScreen';
 import ActivityScreen from '@/screens/ActivityScreen';
 import AnalysisScreen from '@/screens/AnalysisScreen';
 import ResultScreen from '@/screens/ResultScreen';
@@ -14,7 +15,8 @@ import { saveAnalysis } from '@/lib/history';
 import { Loader2 } from 'lucide-react';
 import Logo from '@/components/Logo';
 
-type Screen = 'splash' | 'auth' | 'home' | 'upload' | 'activity' | 'analysis' | 'result' | 'howitworks';
+type Screen = 'splash' | 'auth' | 'home' | 'upload' | 'calibrate' | 'activity' | 'analysis' | 'result' | 'howitworks';
+
 
 function AppInner() {
   const { session, loading } = useAuth();
@@ -26,6 +28,7 @@ function AppInner() {
   const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [historyTick, setHistoryTick] = useState(0);
   const [justFinishedFirstAnalysis, setJustFinishedFirstAnalysis] = useState(false);
+  const [manualMeasurement, setManualMeasurement] = useState<ManualMeasurement | null>(null);
 
   const handleSplashDone = () => {
     setScreen(session ? 'home' : 'auth');
@@ -35,6 +38,11 @@ function AppInner() {
   const handleUploadNext = (top: string, side: string) => {
     setTopImage(top);
     setSideImage(side);
+    setScreen('calibrate');
+  };
+
+  const handleCalibrationNext = (measurement: ManualMeasurement) => {
+    setManualMeasurement(measurement);
     setScreen('activity');
   };
 
@@ -42,6 +50,7 @@ function AppInner() {
     setActivity(selectedActivity);
     setScreen('analysis');
   };
+
 
   const handleAnalysisComplete = useCallback(async (analysisResult: AnalysisResult) => {
     setResult(analysisResult);
@@ -61,9 +70,11 @@ function AppInner() {
     setActivity(null);
     setResult(null);
     setAnalysisId(null);
+    setManualMeasurement(null);
     setScreen('home');
     setJustFinishedFirstAnalysis(false);
   };
+
 
   if (loading) {
     return (
@@ -96,15 +107,24 @@ function AppInner() {
       {screen === 'splash' && <SplashScreen onDone={handleSplashDone} />}
       {screen === 'home' && <HomeScreen onGetStarted={() => setScreen('upload')} onHowItWorks={() => setScreen('howitworks')} historyTick={historyTick} justFinishedFirstAnalysis={justFinishedFirstAnalysis} onAppRatingDismissed={() => setJustFinishedFirstAnalysis(false)} />}
       {screen === 'upload' && <UploadScreen onBack={() => setScreen('home')} onNext={handleUploadNext} />}
-      {screen === 'activity' && <ActivityScreen onBack={() => setScreen('upload')} onNext={handleActivityNext} />}
+      {screen === 'calibrate' && topImage && (
+        <CalibrationScreen
+          topImage={topImage}
+          onBack={() => setScreen('upload')}
+          onNext={handleCalibrationNext}
+        />
+      )}
+      {screen === 'activity' && <ActivityScreen onBack={() => setScreen('calibrate')} onNext={handleActivityNext} />}
       {screen === 'analysis' && activity && topImage && sideImage && (
         <AnalysisScreen
           activity={activity}
           topImage={topImage}
           sideImage={sideImage}
+          manualMeasurement={manualMeasurement}
           onComplete={handleAnalysisComplete}
         />
       )}
+
       {screen === 'result' && result && (
         <ResultScreen result={result} analysisId={analysisId} onBack={() => setScreen('activity')} onAnalyzeAgain={handleAnalyzeAgain} />
       )}
