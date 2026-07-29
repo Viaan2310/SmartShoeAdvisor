@@ -107,15 +107,24 @@ function AppInner() {
       {screen === 'splash' && <SplashScreen onDone={handleSplashDone} />}
       {screen === 'home' && <HomeScreen onGetStarted={() => setScreen('upload')} onHowItWorks={() => setScreen('howitworks')} historyTick={historyTick} justFinishedFirstAnalysis={justFinishedFirstAnalysis} onAppRatingDismissed={() => setJustFinishedFirstAnalysis(false)} />}
       {screen === 'upload' && <UploadScreen onBack={() => setScreen('home')} onNext={handleUploadNext} />}
-      {screen === 'activity' && <ActivityScreen onBack={() => setScreen('upload')} onNext={handleActivityNext} />}
+      {screen === 'calibrate' && topImage && (
+        <CalibrationScreen
+          topImage={topImage}
+          onBack={() => setScreen('upload')}
+          onNext={handleCalibrationNext}
+        />
+      )}
+      {screen === 'activity' && <ActivityScreen onBack={() => setScreen('calibrate')} onNext={handleActivityNext} />}
       {screen === 'analysis' && activity && topImage && sideImage && (
         <AnalysisScreen
           activity={activity}
           topImage={topImage}
           sideImage={sideImage}
+          manualMeasurement={manualMeasurement}
           onComplete={handleAnalysisComplete}
         />
       )}
+
       {screen === 'result' && result && (
         <ResultScreen result={result} analysisId={analysisId} onBack={() => setScreen('activity')} onAnalyzeAgain={handleAnalyzeAgain} />
       )}
