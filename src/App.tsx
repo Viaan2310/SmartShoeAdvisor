@@ -5,6 +5,7 @@ import SplashScreen from '@/screens/SplashScreen';
 import AuthScreen from '@/screens/AuthScreen';
 import HomeScreen from '@/screens/HomeScreen';
 import UploadScreen from '@/screens/UploadScreen';
+import CalibrationScreen, { type ManualMeasurement } from '@/screens/CalibrationScreen';
 import ActivityScreen from '@/screens/ActivityScreen';
 import AnalysisScreen from '@/screens/AnalysisScreen';
 import ResultScreen from '@/screens/ResultScreen';
@@ -14,7 +15,8 @@ import { saveAnalysis } from '@/lib/history';
 import { Loader2 } from 'lucide-react';
 import Logo from '@/components/Logo';
 
-type Screen = 'splash' | 'auth' | 'home' | 'upload' | 'activity' | 'analysis' | 'result' | 'howitworks';
+type Screen = 'splash' | 'auth' | 'home' | 'upload' | 'calibrate' | 'activity' | 'analysis' | 'result' | 'howitworks';
+
 
 function AppInner() {
   const { session, loading } = useAuth();
