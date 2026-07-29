@@ -147,13 +147,24 @@ function calculateConfidence(metrics: ImageAnalysis): number {
   return Math.min(Math.max(Math.round(confidence), 82), 99);
 }
 
+export interface AiOverride {
+  footType?: 'normal_arch' | 'high_arch' | 'flat_foot' | 'overpronation' | 'supination';
+  archHeightPercent?: number;
+  pronation?: string;
+  imageQuality?: number;
+  confidence?: number;
+  reasoning?: string;
+}
+
 // Run the full analysis pipeline using real image pixel data.
 // An optional `manual` override supplies user-calibrated measurements from CalibrationScreen.
+// An optional `ai` override merges AI vision classification on top of the heuristic result.
 export async function runAnalysis(
   activity: ActivityId,
   topImage: string,
   sideImage: string,
   manual?: { footLengthCm: number; footWidthCm: number; pixelsPerCm: number },
+  ai?: AiOverride | null,
 ): Promise<AnalysisResult> {
   const imageAnalysis: ImageAnalysis = await analyzeFootImages(topImage, sideImage);
   // Apply manual overrides if provided — these come from the user's own drag-drop calibration.
@@ -165,6 +176,16 @@ export async function runAnalysis(
     imageAnalysis.widthRatio = manual.footLengthCm > 0 ? manual.footWidthCm / manual.footLengthCm : imageAnalysis.widthRatio;
     imageAnalysis.measurementConfidence = 100;
   }
+  // Apply AI classification overrides — stronger signal than heuristics for foot type/arch.
+  if (ai) {
+    if (ai.footType) imageAnalysis.footType = ai.footType;
+    if (typeof ai.archHeightPercent === 'number') imageAnalysis.archHeightPercent = ai.archHeightPercent;
+    if (ai.pronation) imageAnalysis.pronation = ai.pronation;
+    if (typeof ai.imageQuality === 'number') {
+      imageAnalysis.imageQuality = Math.max(imageAnalysis.imageQuality, ai.imageQuality);
+    }
+  }
+
   const footType = imageAnalysis.footType;
   const ftInfo = footTypes[footType];
 
