@@ -37,11 +37,11 @@
   }
 }
 
+@utility glass {
+  @apply bg-white/90 dark:bg-white/5 backdrop-blur-xl border border-gray-200/80 dark:border-white/10 shadow-sm dark:shadow-none;
+}
+
 @layer components {
-  .glass {
-    @apply bg-white/90 dark:bg-white/5 backdrop-blur-xl border border-gray-200/80 dark:border-white/10
-           shadow-sm dark:shadow-none;
-  }
 
   .glass-card {
     @apply glass rounded-[20px] shadow-[0_4px_24px_rgba(15,23,42,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]
