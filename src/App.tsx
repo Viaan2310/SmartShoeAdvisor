@@ -28,6 +28,7 @@ function AppInner() {
   const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [historyTick, setHistoryTick] = useState(0);
   const [justFinishedFirstAnalysis, setJustFinishedFirstAnalysis] = useState(false);
+  const [manualMeasurement, setManualMeasurement] = useState<ManualMeasurement | null>(null);
 
   const handleSplashDone = () => {
     setScreen(session ? 'home' : 'auth');
@@ -37,6 +38,11 @@ function AppInner() {
   const handleUploadNext = (top: string, side: string) => {
     setTopImage(top);
     setSideImage(side);
+    setScreen('calibrate');
+  };
+
+  const handleCalibrationNext = (measurement: ManualMeasurement) => {
+    setManualMeasurement(measurement);
     setScreen('activity');
   };
 
@@ -44,6 +50,7 @@ function AppInner() {
     setActivity(selectedActivity);
     setScreen('analysis');
   };
+
 
   const handleAnalysisComplete = useCallback(async (analysisResult: AnalysisResult) => {
     setResult(analysisResult);
