@@ -244,6 +244,38 @@ export default function CalibrationScreen({ topImage, onBack, onNext }: Calibrat
           })}
         </svg>
 
+        {/* Per-line live cm/scale badges at line midpoint */}
+        {geom && steps.map((id) => {
+          const l = lines[id];
+          const isActive = id === currentLine;
+          const c = stepInfo[id].color;
+          const mx = ((l.a.x + l.b.x) / 2) * 100;
+          const my = ((l.a.y + l.b.y) / 2) * 100;
+          const label =
+            id === 'ruler'
+              ? `30 cm · ${geom.pixelsPerCm.toFixed(1)} px/cm`
+              : id === 'length'
+              ? `L ${geom.lengthCm.toFixed(1)} cm`
+              : `W ${geom.widthCm.toFixed(1)} cm`;
+          return (
+            <div
+              key={`${id}-badge`}
+              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-black/70 backdrop-blur-sm border whitespace-nowrap"
+              style={{
+                left: `${mx}%`,
+                top: `${my}%`,
+                color: c,
+                borderColor: `${c}80`,
+                opacity: isActive ? 1 : 0.6,
+                zIndex: isActive ? 15 : 5,
+                boxShadow: isActive ? `0 0 12px ${c}66` : 'none',
+              }}
+            >
+              {label}
+            </div>
+          );
+        })}
+
         {/* Handles (HTML for easy pointer capture on mobile) */}
         {steps.map((id) => {
           const l = lines[id];
