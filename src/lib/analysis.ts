@@ -201,7 +201,16 @@ export async function runAnalysis(
   const sizes = lengthToSizes(footLengthCm);
 
   const { primary, alternatives } = pickBestShoe(activity, footType, imageAnalysis);
-  const confidence = calculateConfidence(imageAnalysis);
+  let confidence = calculateConfidence(imageAnalysis);
+  if (ai && typeof ai.confidence === 'number') {
+    // Blend heuristic confidence with the model's own confidence, favouring the higher signal.
+    confidence = Math.min(99, Math.round(confidence * 0.4 + ai.confidence * 0.6));
+  }
+
+  const heuristicReason = primary.matchReasons.length > 0
+    ? `${primary.shoe.reason} ${primary.matchReasons.join('. ')}.`
+    : primary.shoe.reason;
+  const reason = ai?.reasoning ? `${ai.reasoning} ${heuristicReason}` : heuristicReason;
 
   return {
     foot_length: `${footLengthCm.toFixed(1)} cm${rulerDetected ? '' : ' (est.)'}`,
@@ -216,9 +225,7 @@ export async function runAnalysis(
     recommended_shoe: primary.shoe.shoeName,
     brand: primary.shoe.brand,
     image: primary.shoe.image,
-    reason: primary.matchReasons.length > 0
-      ? `${primary.shoe.reason} ${primary.matchReasons.join('. ')}.`
-      : primary.shoe.reason,
+    reason,
     confidence,
     comfort: primary.shoe.comfort,
     support: primary.shoe.support,
