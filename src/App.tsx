@@ -70,9 +70,11 @@ function AppInner() {
     setActivity(null);
     setResult(null);
     setAnalysisId(null);
+    setManualMeasurement(null);
     setScreen('home');
     setJustFinishedFirstAnalysis(false);
   };
+
 
   if (loading) {
     return (
