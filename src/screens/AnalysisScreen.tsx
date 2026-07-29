@@ -3,7 +3,8 @@ import { analysisSteps } from '@/lib/analysis';
 import * as Icons from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ActivityId, AnalysisResult } from '@/data/shoes';
-import { runAnalysis } from '@/lib/analysis';
+import { runAnalysis, type AiOverride } from '@/lib/analysis';
+import { analyzeFootWithAI } from '@/lib/ai-analysis.functions';
 
 interface AnalysisScreenProps {
   activity: ActivityId;
@@ -11,6 +12,31 @@ interface AnalysisScreenProps {
   sideImage: string;
   manualMeasurement?: { footLengthCm: number; footWidthCm: number; pixelsPerCm: number } | null;
   onComplete: (result: AnalysisResult) => void;
+}
+
+// Downscale a data-URL image to keep AI payloads small (≈768px max, JPEG q0.8).
+async function shrinkDataUrl(src: string, max = 768): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return resolve(src);
+      ctx.drawImage(img, 0, 0, w, h);
+      try {
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      } catch {
+        resolve(src);
+      }
+    };
+    img.onerror = () => resolve(src);
+    img.src = src;
+  });
 }
 
 export default function AnalysisScreen({ activity, topImage, sideImage, manualMeasurement, onComplete }: AnalysisScreenProps) {
@@ -24,20 +50,53 @@ export default function AnalysisScreen({ activity, topImage, sideImage, manualMe
   useEffect(() => {
     let cancelled = false;
 
-    runAnalysis(activity, topImage, sideImage, manualMeasurement ?? undefined)
+    (async () => {
+      // Fire AI vision analysis (silent fallback to local if it fails).
+      let ai: AiOverride | null = null;
+      try {
+        const [tinyTop, tinySide] = await Promise.all([
+          shrinkDataUrl(topImage),
+          shrinkDataUrl(sideImage),
+        ]);
+        const aiResult = await analyzeFootWithAI({
+          data: {
+            activity,
+            topImage: tinyTop,
+            sideImage: tinySide,
+            manual: manualMeasurement
+              ? { footLengthCm: manualMeasurement.footLengthCm, footWidthCm: manualMeasurement.footWidthCm }
+              : null,
+          },
+        });
+        if (aiResult) {
+          ai = {
+            footType: aiResult.footType,
+            archHeightPercent: aiResult.archHeightPercent,
+            pronation: aiResult.pronation,
+            imageQuality: aiResult.imageQuality,
+            confidence: aiResult.confidence,
+            reasoning: aiResult.reasoning,
+          };
+        }
+      } catch (err) {
+        // Silent fallback — local analysis still runs below.
+        console.warn('AI analysis unavailable, using local model.', err);
+      }
 
-      .then((result) => {
+      try {
+        const result = await runAnalysis(activity, topImage, sideImage, manualMeasurement ?? undefined, ai);
         if (cancelled) return;
         resultRef.current = result;
         if (completedRef.current && !firedRef.current) {
           firedRef.current = true;
           onComplete(result);
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : 'Analysis failed. Please try again.');
-      });
+      }
+    })();
+
 
     const stepDuration = 500;
     const totalSteps = analysisSteps.length;
