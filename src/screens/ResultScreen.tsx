@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { ArrowLeft, Download, RefreshCw, Share2, Ruler, Footprints, Activity as ActivityIcon, Sparkles, Star, Shield, Wrench, Check, TrendingUp, TrendingDown, RotateCw, RotateCcw, Send, X, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, Download, RefreshCw, Share2, Ruler, Footprints, Activity as ActivityIcon, Sparkles, Star, Shield, Wrench, Check, TrendingUp, TrendingDown, RotateCw, RotateCcw, Send, X, Heart, AlertTriangle, type LucideIcon } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import Logo from '@/components/Logo';
 import FootDiagram from '@/components/FootDiagram';
@@ -319,10 +319,69 @@ export default function ResultScreen({ result, analysisId, onBack, onAnalyzeAgai
                 </button>
               ))}
             </div>
-          </div>
-        )}
+        </div>
+      )}
 
-        {/* Rate this analysis */}
+      {/* Foot health tips & wrong-shoe hazards */}
+      <div className="grid md:grid-cols-2 gap-5 mb-8">
+        <div className="glass-card p-5 md:p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-green-500/10 blur-3xl" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg">
+                <Heart size={20} className="text-white" />
+              </div>
+              <h3 className="font-semibold text-lg">Healthy Foot Tips</h3>
+            </div>
+            <ul className="space-y-3">
+              {[
+                'Measure your feet every 6–12 months — foot size changes with age and activity.',
+                'Rotate between 2–3 pairs of shoes so each can fully dry and decompress.',
+                'Replace worn shoes after 300–500 miles or when the tread/midsole feels flat.',
+                'Wear moisture-wicking socks to reduce blisters, fungus, and odor.',
+                'Trim toenails straight across to prevent painful ingrown nails.',
+                'Stretch calves and plantar fascia daily, especially after sports or long walks.',
+                'Choose shoes designed for your specific activity and surface.',
+              ].map((tip, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                  <Check size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="glass-card p-5 md:p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-red-500/10 blur-3xl" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg">
+                <AlertTriangle size={20} className="text-white" />
+              </div>
+              <h3 className="font-semibold text-lg">Hazards of Wrong Shoes</h3>
+            </div>
+            <ul className="space-y-3">
+              {[
+                'Blisters, corns, and calluses from friction and pressure points.',
+                'Bunions and hammertoes caused by narrow toe boxes over time.',
+                'Plantar fasciitis and chronic heel pain from poor arch support.',
+                'Knee, hip, and lower-back pain due to misaligned gait.',
+                'Higher risk of ankle sprains when shoes lack stability or grip.',
+                'Ingrown toenails and bruised nails from tight or short footwear.',
+                'Reduced athletic performance and faster fatigue during activity.',
+              ].map((hazard, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                  <AlertTriangle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
+                  {hazard}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Rate this analysis */}
         <div className="mb-6 glass-card p-6 text-center relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 h-24 w-48 rounded-full bg-amber-400/10 blur-3xl" />
           <div className="relative z-10">
