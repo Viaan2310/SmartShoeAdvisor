@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { ArrowLeft, Download, RefreshCw, Share2, Ruler, Footprints, Activity as ActivityIcon, Sparkles, Star, Shield, Wrench, Check, TrendingUp, TrendingDown, RotateCw, RotateCcw, Send, X, Heart, AlertTriangle, type LucideIcon } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import Logo from '@/components/Logo';
+import HomeButton from '@/components/HomeButton';
 import FootDiagram from '@/components/FootDiagram';
 import { activities, footTypes } from '@/data/shoes';
 import type { AnalysisResult } from '@/data/shoes';
@@ -11,6 +12,7 @@ interface ResultScreenProps {
   result: AnalysisResult;
   analysisId: string | null;
   onBack: () => void;
+  onHome: () => void;
   onAnalyzeAgain: () => void;
 }
 
@@ -54,7 +56,7 @@ const footTypeIcons: Record<string, LucideIcon> = {
   RotateCcw: RotateCcw,
 };
 
-export default function ResultScreen({ result, analysisId, onBack, onAnalyzeAgain }: ResultScreenProps) {
+export default function ResultScreen({ result, analysisId, onBack, onHome, onAnalyzeAgain }: ResultScreenProps) {
   const reportRef = useRef<HTMLDivElement>(null);
   const [selectedAlt, setSelectedAlt] = useState<number | null>(null);
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -136,7 +138,7 @@ export default function ResultScreen({ result, analysisId, onBack, onAnalyzeAgai
             <ArrowLeft size={20} className="text-blue-600 dark:text-blue-400" />
           </button>
           <Logo size="sm" />
-          <div className="w-10" />
+          <HomeButton onClick={onHome} />
         </div>
       </header>
 

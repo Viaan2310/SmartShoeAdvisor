@@ -5,12 +5,14 @@ import type { LucideIcon } from 'lucide-react';
 import type { ActivityId, AnalysisResult } from '@/data/shoes';
 import { runAnalysis, type AiOverride } from '@/lib/analysis';
 import { analyzeFootWithAI } from '@/lib/ai-analysis.functions';
+import HomeButton from '@/components/HomeButton';
 
 interface AnalysisScreenProps {
   activity: ActivityId;
   topImage: string;
   sideImage: string;
   manualMeasurement?: { footLengthCm: number; footWidthCm: number; pixelsPerCm: number } | null;
+  onHome: () => void;
   onComplete: (result: AnalysisResult) => void;
 }
 
@@ -39,7 +41,7 @@ async function shrinkDataUrl(src: string, max = 768): Promise<string> {
   });
 }
 
-export default function AnalysisScreen({ activity, topImage, sideImage, manualMeasurement, onComplete }: AnalysisScreenProps) {
+export default function AnalysisScreen({ activity, topImage, sideImage, manualMeasurement, onHome, onComplete }: AnalysisScreenProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -158,6 +160,9 @@ export default function AnalysisScreen({ activity, topImage, sideImage, manualMe
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-5 py-8">
+      <div className="absolute top-5 left-5 z-20">
+        <HomeButton onClick={onHome} />
+      </div>
       <div className="absolute top-1/4 left-1/4 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl animate-float" />
       <div className="absolute bottom-1/4 right-1/4 h-80 w-80 rounded-full bg-cyan-500/10 blur-3xl animate-float-slow" />
 
