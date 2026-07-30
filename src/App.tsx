@@ -64,6 +64,16 @@ function AppInner() {
     }
   }, [session]);
 
+  const goHome = () => {
+    setTopImage(null);
+    setSideImage(null);
+    setActivity(null);
+    setResult(null);
+    setAnalysisId(null);
+    setManualMeasurement(null);
+    setScreen('home');
+  };
+
   const handleAnalyzeAgain = () => {
     setTopImage(null);
     setSideImage(null);
@@ -106,29 +116,31 @@ function AppInner() {
     <div className="min-h-screen">
       {screen === 'splash' && <SplashScreen onDone={handleSplashDone} />}
       {screen === 'home' && <HomeScreen onGetStarted={() => setScreen('upload')} onHowItWorks={() => setScreen('howitworks')} historyTick={historyTick} justFinishedFirstAnalysis={justFinishedFirstAnalysis} onAppRatingDismissed={() => setJustFinishedFirstAnalysis(false)} />}
-      {screen === 'upload' && <UploadScreen onBack={() => setScreen('home')} onNext={handleUploadNext} />}
+      {screen === 'upload' && <UploadScreen onBack={() => setScreen('home')} onHome={goHome} onNext={handleUploadNext} />}
       {screen === 'calibrate' && topImage && (
         <CalibrationScreen
           topImage={topImage}
           onBack={() => setScreen('upload')}
+          onHome={goHome}
           onNext={handleCalibrationNext}
         />
       )}
-      {screen === 'activity' && <ActivityScreen onBack={() => setScreen('calibrate')} onNext={handleActivityNext} />}
+      {screen === 'activity' && <ActivityScreen onBack={() => setScreen('calibrate')} onHome={goHome} onNext={handleActivityNext} />}
       {screen === 'analysis' && activity && topImage && sideImage && (
         <AnalysisScreen
           activity={activity}
           topImage={topImage}
           sideImage={sideImage}
           manualMeasurement={manualMeasurement}
+          onHome={goHome}
           onComplete={handleAnalysisComplete}
         />
       )}
 
       {screen === 'result' && result && (
-        <ResultScreen result={result} analysisId={analysisId} onBack={() => setScreen('activity')} onAnalyzeAgain={handleAnalyzeAgain} />
+        <ResultScreen result={result} analysisId={analysisId} onBack={() => setScreen('activity')} onHome={goHome} onAnalyzeAgain={handleAnalyzeAgain} />
       )}
-      {screen === 'howitworks' && <HowItWorksScreen onBack={() => setScreen('home')} />}
+      {screen === 'howitworks' && <HowItWorksScreen onBack={() => setScreen('home')} onHome={goHome} />}
     </div>
   );
 }

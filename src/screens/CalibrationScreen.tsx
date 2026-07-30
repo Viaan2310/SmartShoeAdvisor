@@ -1,3 +1,4 @@
+import HomeButton from '@/components/HomeButton';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Ruler, Move, Check, RotateCcw } from 'lucide-react';
 
@@ -10,6 +11,7 @@ export interface ManualMeasurement {
 interface CalibrationScreenProps {
   topImage: string;
   onBack: () => void;
+  onHome: () => void;
   onNext: (measurement: ManualMeasurement) => void;
 }
 
@@ -56,7 +58,7 @@ function dist(a: Point, b: Point) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-export default function CalibrationScreen({ topImage, onBack, onNext }: CalibrationScreenProps) {
+export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: CalibrationScreenProps) {
   const [lines, setLines] = useState<Record<LineId, LineState>>(initialLines);
   const [stepIdx, setStepIdx] = useState(0);
   const [imgDims, setImgDims] = useState<{ w: number; h: number } | null>(null);
@@ -179,9 +181,12 @@ export default function CalibrationScreen({ topImage, onBack, onNext }: Calibrat
           <h1 className="text-lg font-bold">Calibrate measurements</h1>
           <p className="text-xs text-gray-500 dark:text-gray-400">Step {stepIdx + 1} of {steps.length}</p>
         </div>
-        <button onClick={reset} className="ml-auto h-10 w-10 rounded-full glass-card flex items-center justify-center ripple" aria-label="Reset line">
-          <RotateCcw size={16} />
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <button onClick={reset} className="h-10 w-10 rounded-full glass-card flex items-center justify-center ripple" aria-label="Reset line">
+            <RotateCcw size={16} />
+          </button>
+          <HomeButton onClick={onHome} className="!rounded-full h-10 w-10 justify-center !p-0" />
+        </div>
       </header>
 
       {/* Step chips */}

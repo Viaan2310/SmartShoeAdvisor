@@ -3,14 +3,16 @@ import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Logo from '@/components/Logo';
+import HomeButton from '@/components/HomeButton';
 import { activities, type ActivityId } from '@/data/shoes';
 
 interface ActivityScreenProps {
   onBack: () => void;
+  onHome: () => void;
   onNext: (activity: ActivityId) => void;
 }
 
-export default function ActivityScreen({ onBack, onNext }: ActivityScreenProps) {
+export default function ActivityScreen({ onBack, onHome, onNext }: ActivityScreenProps) {
   const [selected, setSelected] = useState<ActivityId | null>(null);
 
   return (
@@ -23,7 +25,7 @@ export default function ActivityScreen({ onBack, onNext }: ActivityScreenProps) 
             <ArrowLeft size={20} className="text-blue-600 dark:text-blue-400" />
           </button>
           <Logo size="sm" />
-          <div className="w-10" />
+          <HomeButton onClick={onHome} />
         </div>
       </header>
 

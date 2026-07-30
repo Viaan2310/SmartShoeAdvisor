@@ -1,9 +1,11 @@
 import { useRef, useState, useCallback } from 'react';
 import { Upload, Camera, Image as ImageIcon, X, ArrowRight, ArrowLeft, Info, Check } from 'lucide-react';
 import Logo from '@/components/Logo';
+import HomeButton from '@/components/HomeButton';
 
 interface UploadScreenProps {
   onBack: () => void;
+  onHome: () => void;
   onNext: (topImage: string, sideImage: string) => void;
 }
 
@@ -15,7 +17,7 @@ interface ImageState {
   isUploading: boolean;
 }
 
-export default function UploadScreen({ onBack, onNext }: UploadScreenProps) {
+export default function UploadScreen({ onBack, onHome, onNext }: UploadScreenProps) {
   const [topImage, setTopImage] = useState<ImageState>({ data: null, progress: 0, isUploading: false });
   const [sideImage, setSideImage] = useState<ImageState>({ data: null, progress: 0, isUploading: false });
   const [isDragging, setIsDragging] = useState<Slot | null>(null);
@@ -172,7 +174,7 @@ export default function UploadScreen({ onBack, onNext }: UploadScreenProps) {
             <ArrowLeft size={20} className="text-blue-600 dark:text-blue-400" />
           </button>
           <Logo size="sm" />
-          <div className="w-10" />
+          <HomeButton onClick={onHome} />
         </div>
       </header>
 

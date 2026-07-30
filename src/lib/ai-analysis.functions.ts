@@ -15,17 +15,110 @@ const InputSchema = z.object({
     .nullable(),
 });
 
+const FootTypeEnum = z.enum(['normal_arch', 'high_arch', 'flat_foot', 'overpronation', 'supination']);
+
 const AiFootSchema = z.object({
-  footType: z.enum(['normal_arch', 'high_arch', 'flat_foot', 'overpronation', 'supination']),
+  footType: FootTypeEnum,
   archHeightPercent: z.number(),
+  archIndex: z.number(),
   pronation: z.string(),
+  pronationDegree: z.enum(['neutral', 'mild_over', 'severe_over', 'mild_under', 'severe_under']),
   imageQuality: z.number(),
   confidence: z.number(),
   widthCategory: z.enum(['narrow', 'medium', 'wide']),
+  toeShape: z.enum(['egyptian', 'greek', 'roman', 'unclear']),
+  observations: z.array(z.string()),
   reasoning: z.string(),
 });
 
 export type AiFootAnalysis = z.infer<typeof AiFootSchema>;
+
+const SYSTEM_PROMPT = `You are a podiatry-grade foot-morphology classifier. You receive two photographs of ONE foot: a TOP (dorsal/plantar-facing) view and a SIDE (medial) view. Classify the foot for footwear fitting and return ONLY JSON matching the schema.
+
+STEP 1 — Read the side view (medial arch):
+- Locate the heel pad, the medial arch gap and the ball of the foot.
+- Estimate the arch gap height as a fraction of foot length. Typical bands:
+  * gap barely visible / sole touches ground along the midfoot -> flat
+  * shallow but continuous gap -> low-normal
+  * clear, well-defined curve -> normal
+  * tall gap, midfoot lifted well off the surface -> high
+- Estimate the navicular (highest arch point) height relative to heel height.
+
+STEP 2 — Read the top view (midfoot width / footprint):
+- Compare midfoot width to forefoot (ball) width. This is the arch index proxy:
+  archIndex = midfoot width / forefoot width, roughly 0.00–1.00.
+  * archIndex > 0.30 -> flat / collapsed arch
+  * 0.21–0.30 -> normal
+  * < 0.21 -> high arch / cavus
+- Note toe splay, hallux (big toe) angle, forefoot spread, heel width.
+
+STEP 3 — Alignment (pronation):
+- Look at the heel/Achilles line in the side view and the medial bulge in the top view.
+- Inward collapse of the ankle + medial bulge -> overpronation.
+- Outward tilt + weight on the lateral edge + narrow midfoot -> supination.
+
+STEP 4 — Reconcile before classifying. The two views must agree:
+- flat_foot: archHeightPercent <= 22 AND archIndex >= 0.30, without obvious inward ankle roll.
+- overpronation: low/collapsed arch PLUS visible inward ankle/heel roll (this beats flat_foot when roll is visible).
+- normal_arch: archHeightPercent 23–60 and archIndex 0.21–0.30.
+- high_arch: archHeightPercent >= 61 AND archIndex <= 0.20, heel/ankle roughly vertical.
+- supination: high arch PLUS outward roll / lateral weight bearing.
+If the two views disagree, trust the SIDE view for arch height and the TOP view for width, then lower confidence.
+
+FIELD RULES:
+- archHeightPercent: 0 (fully flat) to 100 (extreme cavus). Must be numerically consistent with footType per the bands above.
+- archIndex: the midfoot/forefoot width ratio you measured (0–1, two decimals).
+- pronation: one short phrase, e.g. "Neutral", "Mild inward roll", "Excessive inward roll", "Outward roll (underpronation)".
+- pronationDegree: neutral | mild_over | severe_over | mild_under | severe_under, matching the phrase.
+- imageQuality: 0–100 (lighting, focus, whether the whole foot and the arch are visible).
+- confidence: 0–100. Be honest: below 60 when a view is cropped, blurry, angled or the arch is hidden.
+- widthCategory: narrow | medium | wide, using width/length ratio (<0.36 narrow, 0.36–0.41 medium, >0.41 wide).
+- toeShape: egyptian (big toe longest), greek (2nd toe longest), roman (first three even), unclear.
+- observations: 2–4 short factual visual notes, each citing something you actually see.
+- reasoning: 1–2 sentences tying the side-view arch and the top-view width to the final class.
+
+Be decisive and quantitative. Never refuse; if the photos are poor, still commit to the most probable class and lower confidence.`;
+
+const RANK: Record<z.infer<typeof FootTypeEnum>, number> = {
+  flat_foot: 0,
+  overpronation: 1,
+  normal_arch: 2,
+  high_arch: 3,
+  supination: 4,
+};
+
+// Reconcile two independent passes into one answer.
+function reconcile(a: AiFootAnalysis, b: AiFootAnalysis): AiFootAnalysis {
+  const agree = a.footType === b.footType;
+  const primary = a.confidence >= b.confidence ? a : b;
+  const other = primary === a ? b : a;
+
+  if (agree) {
+    return {
+      ...primary,
+      archHeightPercent: Math.round((a.archHeightPercent + b.archHeightPercent) / 2),
+      archIndex: Number(((a.archIndex + b.archIndex) / 2).toFixed(2)),
+      imageQuality: Math.round((a.imageQuality + b.imageQuality) / 2),
+      // Agreement across independent passes justifies a modest confidence boost.
+      confidence: Math.min(99, Math.round((a.confidence + b.confidence) / 2) + 8),
+      observations: Array.from(new Set([...a.observations, ...b.observations])).slice(0, 4),
+    };
+  }
+
+  // Disagreement: keep the more confident class, but damp confidence.
+  // Adjacent classes (e.g. flat_foot vs overpronation) are a smaller disagreement than opposite ends.
+  const distance = Math.abs(RANK[a.footType] - RANK[b.footType]);
+  const penalty = distance <= 1 ? 12 : 25;
+  return {
+    ...primary,
+    archHeightPercent: Math.round((a.archHeightPercent + b.archHeightPercent) / 2),
+    archIndex: Number(((a.archIndex + b.archIndex) / 2).toFixed(2)),
+    imageQuality: Math.min(a.imageQuality, b.imageQuality),
+    confidence: Math.max(35, primary.confidence - penalty),
+    reasoning: `${primary.reasoning} (Second pass suggested ${other.footType.replace('_', ' ')}; confidence reduced.)`,
+    observations: primary.observations.slice(0, 4),
+  };
+}
 
 export const analyzeFootWithAI = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => InputSchema.parse(input))
@@ -37,41 +130,27 @@ export const analyzeFootWithAI = createServerFn({ method: 'POST' })
     const model = gateway('openai/gpt-5.6-sol');
 
     const manualLine = data.manual
-      ? `The user calibrated the ruler by hand: foot length = ${data.manual.footLengthCm.toFixed(1)} cm, foot width = ${data.manual.footWidthCm.toFixed(1)} cm. Treat these as ground truth for size.`
-      : 'No manual calibration provided; estimate visually.';
+      ? `Verified manual calibration: foot length = ${data.manual.footLengthCm.toFixed(1)} cm, foot width = ${data.manual.footWidthCm.toFixed(
+          1,
+        )} cm (width/length ratio ${(data.manual.footWidthCm / Math.max(1, data.manual.footLengthCm)).toFixed(
+          2,
+        )}). Treat these as ground truth for size and widthCategory.`
+      : 'No manual calibration provided; estimate width category visually from the top view.';
 
-    const systemPrompt = `You are a certified podiatrist AI assessing a user's foot from two photographs (top view and side view) for shoe fitting.
-Return ONLY structured JSON matching the provided schema.
-
-Definitions:
-- footType: one of normal_arch, high_arch, flat_foot, overpronation, supination.
-  * flat_foot: no visible arch, full sole contact.
-  * overpronation: foot rolls inward, low arch, wide midfoot.
-  * normal_arch: balanced medial arch.
-  * high_arch: pronounced arch gap on side view.
-  * supination: foot rolls outward, very high arch, narrow contact.
-- archHeightPercent: 0 (fully flat) to 100 (very high arch), estimated from the side view gap under the midfoot.
-- pronation: one short phrase (e.g. "Neutral", "Slight inward roll", "Excessive inward roll", "Outward roll (underpronation)").
-- imageQuality: 0-100 based on lighting, focus, foot visibility.
-- confidence: 0-100 of your overall classification.
-- widthCategory: narrow / medium / wide relative to typical adult feet.
-- reasoning: 1-2 short sentences citing what you see (e.g. arch gap, toe splay, heel width).
-
-Be decisive. If images are poor, still make your best call and lower confidence/imageQuality accordingly.`;
-
-    try {
+    const runPass = async (temperature: number) => {
       const { output } = await generateText({
         model,
         output: Output.object({ schema: AiFootSchema }),
-        providerOptions: { lovable: { reasoningEffort: 'none' } },
+        temperature,
+        providerOptions: { lovable: { reasoningEffort: 'medium' } },
         messages: [
-          { role: 'system', content: systemPrompt },
+          { role: 'system', content: SYSTEM_PROMPT },
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: `Activity intent: ${data.activity}. ${manualLine}\nAnalyze both images and return the JSON.`,
+                text: `Activity intent: ${data.activity}. ${manualLine}\nImage 1 = TOP view. Image 2 = SIDE view.\nWork through steps 1–4 internally, then return the JSON.`,
               },
               { type: 'image', image: data.topImage },
               { type: 'image', image: data.sideImage },
@@ -80,6 +159,16 @@ Be decisive. If images are poor, still make your best call and lower confidence/
         ],
       });
       return output;
+    };
+
+    try {
+      // Two independent passes → self-consistency check, which markedly reduces
+      // borderline flat_foot / overpronation and high_arch / supination mistakes.
+      const [first, second] = await Promise.allSettled([runPass(0.1), runPass(0.6)]);
+      const a = first.status === 'fulfilled' ? first.value : null;
+      const b = second.status === 'fulfilled' ? second.value : null;
+      if (a && b) return reconcile(a, b);
+      return a ?? b;
     } catch (error) {
       if (NoObjectGeneratedError.isInstance(error)) {
         return null;

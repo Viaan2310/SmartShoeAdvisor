@@ -1,8 +1,10 @@
 import { ArrowLeft, Scan, Brain, Ruler, Footprints, Sparkles, Cpu, Image as ImageIcon, Layers, Zap, Check, BarChart3 } from 'lucide-react';
 import Logo from '@/components/Logo';
+import HomeButton from '@/components/HomeButton';
 
 interface HowItWorksScreenProps {
   onBack: () => void;
+  onHome: () => void;
 }
 
 const pipeline = [
@@ -57,7 +59,7 @@ const techStack = [
   { icon: Footprints, label: 'Biomechanics', desc: 'Arch type and pronation classification' },
 ];
 
-export default function HowItWorksScreen({ onBack }: HowItWorksScreenProps) {
+export default function HowItWorksScreen({ onBack, onHome }: HowItWorksScreenProps) {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-blue-400/10 blur-3xl -z-10" />
@@ -69,7 +71,7 @@ export default function HowItWorksScreen({ onBack }: HowItWorksScreenProps) {
             <ArrowLeft size={20} className="text-blue-600 dark:text-blue-400" />
           </button>
           <Logo size="sm" />
-          <div className="w-10" />
+          <HomeButton onClick={onHome} />
         </div>
       </header>
 
