@@ -1,9 +1,11 @@
 import { useRef, useState, useCallback } from 'react';
 import { Upload, Camera, Image as ImageIcon, X, ArrowRight, ArrowLeft, Info, Check } from 'lucide-react';
 import Logo from '@/components/Logo';
+import HomeButton from '@/components/HomeButton';
 
 interface UploadScreenProps {
   onBack: () => void;
+  onHome: () => void;
   onNext: (topImage: string, sideImage: string) => void;
 }
 
