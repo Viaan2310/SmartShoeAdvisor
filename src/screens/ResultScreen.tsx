@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { ArrowLeft, Download, RefreshCw, Share2, Ruler, Footprints, Activity as ActivityIcon, Sparkles, Star, Shield, Wrench, Check, TrendingUp, TrendingDown, RotateCw, RotateCcw, Send, X, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, Download, RefreshCw, Share2, Ruler, Footprints, Activity as ActivityIcon, Sparkles, Star, Shield, Wrench, Check, TrendingUp, TrendingDown, RotateCw, RotateCcw, Send, X, Heart, AlertTriangle, type LucideIcon } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import Logo from '@/components/Logo';
 import FootDiagram from '@/components/FootDiagram';
