@@ -20,7 +20,8 @@ function lengthToSizes(footLengthCm: number) {
     return Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1);
   };
 
-  return { uk: `UK ${fmt(uk)}`, us: `US ${fmt(us)}`, eu: `EU ${fmt(eu)}` };
+  // India uses the UK sizing scale
+  return { uk: `UK ${fmt(uk)}`, us: `US ${fmt(us)}`, eu: `EU ${fmt(eu)}`, ind: `IND ${fmt(uk)}` };
 }
 
 // ── Shoe scoring engine ──
