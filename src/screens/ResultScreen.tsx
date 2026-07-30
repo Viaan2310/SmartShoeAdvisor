@@ -117,7 +117,7 @@ export default function ResultScreen({ result, analysisId, onBack, onAnalyzeAgai
   };
 
   const handleShare = async () => {
-    const shareText = `Stride AI Recommendation:\n\nShoe: ${result.recommended_shoe}\nFoot Length: ${result.foot_length}\nFoot Type: ${result.foot_type_label}\nSize: ${result.shoe_size.uk} / ${result.shoe_size.us} / ${result.shoe_size.eu}\nConfidence: ${result.confidence}%`;
+    const shareText = `Stride AI Recommendation:\n\nShoe: ${result.recommended_shoe}\nFoot Length: ${result.foot_length}\nFoot Type: ${result.foot_type_label}\nSize: ${result.shoe_size.uk} / ${result.shoe_size.us} / ${result.shoe_size.eu} / ${result.shoe_size.ind}\nConfidence: ${result.confidence}%`;
     if (navigator.share) {
       try { await navigator.share({ title: 'Stride AI Result', text: shareText }); } catch { /* user cancelled */ }
     } else {
@@ -233,6 +233,7 @@ export default function ResultScreen({ result, analysisId, onBack, onAnalyzeAgai
               <span className="glass px-3 py-1.5 rounded-lg text-sm font-semibold">{result.shoe_size.uk}</span>
               <span className="glass px-3 py-1.5 rounded-lg text-sm font-semibold">{result.shoe_size.us}</span>
               <span className="glass px-3 py-1.5 rounded-lg text-sm font-semibold">{result.shoe_size.eu}</span>
+              <span className="glass px-3 py-1.5 rounded-lg text-sm font-semibold text-blue-600 dark:text-blue-400">{result.shoe_size.ind} (India)</span>
             </div>
           </div>
         </div>
@@ -508,6 +509,7 @@ Recommendation:  ${r.foot_type_recommendation}
 UK Size:         ${r.shoe_size.uk}
 US Size:         ${r.shoe_size.us}
 EU Size:         ${r.shoe_size.eu}
+Indian Size:     ${r.shoe_size.ind}
 
 ------------- RECOMMENDATION -------------
 

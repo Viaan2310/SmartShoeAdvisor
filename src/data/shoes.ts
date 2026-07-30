@@ -375,7 +375,7 @@ export const shoeCatalog: Record<ActivityId, ShoeRecommendation[]> = {
 
 export interface AnalysisResult {
   foot_length: string;
-  shoe_size: { uk: string; us: string; eu: string };
+  shoe_size: { uk: string; us: string; eu: string; ind: string };
   foot_type: FootTypeId;
   foot_type_label: string;
   foot_type_description: string;
