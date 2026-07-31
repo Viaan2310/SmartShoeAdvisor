@@ -209,9 +209,9 @@ export const analyzeFootWithAI = createServerFn({ method: 'POST' })
       // Two independent passes → self-consistency check, which markedly reduces
       // borderline flat_foot / overpronation and high_arch / supination mistakes.
       const [first, second] = await Promise.allSettled([runPass(0.1), runPass(0.6)]);
-      const a = first.status === 'fulfilled' ? first.value : null;
-      const b = second.status === 'fulfilled' ? second.value : null;
-      if (a && b) return reconcile(a, b);
+      const a = first.status === 'fulfilled' && first.value ? enforceConsistency(first.value) : null;
+      const b = second.status === 'fulfilled' && second.value ? enforceConsistency(second.value) : null;
+      if (a && b) return enforceConsistency(reconcile(a, b));
       return a ?? b;
     } catch (error) {
       if (NoObjectGeneratedError.isInstance(error)) {
