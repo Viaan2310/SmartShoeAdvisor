@@ -557,12 +557,15 @@ function classifyFootType(
   widthRatio: number,
   heelWidthRatio: number,
   toeShapeRatio: number,
+  archConfidence: number,
 ): {
   footType: ImageAnalysis['footType'];
   archHeightPercent: number;
   pronation: string;
 } {
-  const archPercent = Math.round(archRatio * 100);
+  // Report the arch on a human scale where ~45-60% is a normal arch, so a weak
+  // segmentation never reads as a 0% (completely collapsed) arch.
+  const archPercent = Math.round(Math.min(100, Math.max(5, archRatio * 100)));
 
   // Score each foot type based on how well the features match
   const scores: Record<ImageAnalysis['footType'], number> = {
@@ -573,30 +576,34 @@ function classifyFootType(
     supination: 0,
   };
 
-  // Arch ratio scoring (primary signal)
-  // flat: <0.15, overpronation: 0.15-0.30 + wide, normal: 0.30-0.55, high: 0.55-0.75, supination: >0.75
-  if (archRatio < 0.15) scores.flat_foot += 3;
-  else if (archRatio < 0.22) { scores.flat_foot += 1.5; scores.overpronation += 1.5; }
-  else if (archRatio < 0.30) { scores.overpronation += 2.5; scores.flat_foot += 0.5; }
-  else if (archRatio < 0.40) { scores.normal_arch += 2; scores.overpronation += 1; }
-  else if (archRatio < 0.55) scores.normal_arch += 3;
-  else if (archRatio < 0.70) { scores.high_arch += 2.5; scores.supination += 0.5; }
-  else { scores.supination += 2.5; scores.high_arch += 1; }
+  // Arch ratio scoring (primary signal), weighted by how much we trust the side image.
+  // A flat foot is only called when the midfoot genuinely sits on the ground.
+  const w = 3 * Math.max(0.25, archConfidence);
+  if (archRatio < 0.08) { scores.flat_foot += w; scores.overpronation += w * 0.4; }
+  else if (archRatio < 0.18) { scores.overpronation += w * 0.8; scores.flat_foot += w * 0.5; }
+  else if (archRatio < 0.32) { scores.overpronation += w * 0.6; scores.normal_arch += w * 0.7; }
+  else if (archRatio < 0.62) scores.normal_arch += w;
+  else if (archRatio < 0.82) { scores.high_arch += w * 0.9; scores.normal_arch += w * 0.3; }
+  else { scores.high_arch += w * 0.7; scores.supination += w * 0.7; }
+
+  // When the side image is unreliable, pull the answer toward the population norm
+  // (normal arch) instead of letting weak pixels decide.
+  scores.normal_arch += (1 - Math.min(archConfidence, 1)) * 2.5;
 
   // Width ratio scoring (secondary signal)
   // Wide foot (>0.42) suggests overpronation/flat; narrow (<0.35) suggests supination/high arch
-  if (widthRatio > 0.45) { scores.overpronation += 1.5; scores.flat_foot += 1; }
-  else if (widthRatio > 0.40) { scores.overpronation += 0.8; scores.flat_foot += 0.5; }
-  else if (widthRatio > 0.35) scores.normal_arch += 1;
-  else if (widthRatio > 0.30) { scores.high_arch += 0.8; scores.normal_arch += 0.5; }
-  else { scores.supination += 1.5; scores.high_arch += 1; }
+  if (widthRatio > 0.45) { scores.overpronation += 1.2; scores.flat_foot += 0.5; }
+  else if (widthRatio > 0.40) { scores.overpronation += 0.6; scores.normal_arch += 0.3; }
+  else if (widthRatio > 0.34) scores.normal_arch += 1;
+  else if (widthRatio > 0.29) { scores.high_arch += 0.8; scores.normal_arch += 0.5; }
+  else { scores.supination += 1.2; scores.high_arch += 0.8; }
 
   // Heel width ratio (wide heel relative to ball = flatter foot)
-  if (heelWidthRatio > 0.65) { scores.flat_foot += 0.5; scores.overpronation += 0.5; }
-  else if (heelWidthRatio < 0.45) { scores.high_arch += 0.5; scores.supination += 0.5; }
+  if (heelWidthRatio > 0.7) { scores.flat_foot += 0.4; scores.overpronation += 0.4; }
+  else if (heelWidthRatio < 0.45) { scores.high_arch += 0.5; scores.supination += 0.4; }
 
   // Toe shape (square toes = wider forefoot = flatter)
-  if (toeShapeRatio > 0.85) { scores.flat_foot += 0.3; scores.overpronation += 0.3; }
+  if (toeShapeRatio > 0.88) { scores.flat_foot += 0.2; scores.overpronation += 0.3; }
   else if (toeShapeRatio < 0.6) { scores.high_arch += 0.3; scores.supination += 0.3; }
 
   // Pick the highest-scoring type
@@ -608,6 +615,9 @@ function classifyFootType(
       footType = type as ImageAnalysis['footType'];
     }
   }
+
+  // Guard rail: never report a collapsed arch off a low-confidence side image.
+  if (footType === 'flat_foot' && archConfidence < 0.5) footType = 'overpronation';
 
   const pronationMap: Record<string, string> = {
     flat_foot: 'Moderate inward roll',
@@ -627,7 +637,7 @@ function classifyFootType(
 export async function analyzeFootImages(topImageSrc: string, sideImageSrc: string): Promise<ImageAnalysis> {
   const [topImg, sideImg] = await Promise.all([loadImage(topImageSrc), loadImage(sideImageSrc)]);
 
-  const { archRatio } = analyzeSideImage(sideImg);
+  const { archRatio, archConfidence } = analyzeSideImage(sideImg);
   const top = analyzeTopImage(topImg);
   const topQuality = assessImageQuality(topImg);
   const sideQuality = assessImageQuality(sideImg);
@@ -638,6 +648,8 @@ export async function analyzeFootImages(topImageSrc: string, sideImageSrc: strin
     top.widthRatio,
     top.heelWidthRatio,
     top.toeShapeRatio,
+    archConfidence,
+
   );
 
   return {
