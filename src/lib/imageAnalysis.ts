@@ -360,53 +360,90 @@ function findFootBounds(data: ImageData) {
 }
 
 // Measure the arch profile from the side image.
-// Instead of a single average gap, we sample the arch curve at 10 points along the foot length
-// and compute a weighted arch score that emphasizes the mid-foot region.
-function analyzeSideImage(img: HTMLImageElement): { archRatio: number; archProfile: number[] } {
+// The arch is measured RELATIVE to the ground line (the lowest contact points at the
+// heel and the ball), which is far more robust than absolute pixel brightness: it works
+// on dark or busy backgrounds and survives shadows.
+function analyzeSideImage(img: HTMLImageElement): {
+  archRatio: number;
+  archProfile: number[];
+  archConfidence: number; // 0-1, how much we should trust archRatio
+} {
   const imageData = getImageData(img, 500);
-  const { data: pixels, width } = imageData;
-  const bounds = findFootBounds(imageData);
+  const { width, height } = imageData;
+  const bgColor = detectBackgroundColor(imageData);
 
-  if (bounds.footPixelCount === 0) return { archRatio: 0.5, archProfile: [] };
+  const isFootPx = (x: number, y: number) => colorDistance(pixelAt(imageData, x, y), bgColor) > 45;
 
-  const footHeight = bounds.maxY - bounds.minY;
-  const footWidth = bounds.maxX - bounds.minX;
-  if (footHeight < 10 || footWidth < 10) return { archRatio: 0.5, archProfile: [] };
+  // Bounding box of the foreground using background-distance (adaptive to any background).
+  let minX = width, maxX = 0, minY = height, maxY = 0, count = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!isFootPx(x, y)) continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+      count++;
+    }
+  }
 
-  // Sample 10 columns across the foot, measuring the gap at each
-  const numSamples = 10;
-  const profile: number[] = [];
+  const footWidth = maxX - minX;
+  const footHeight = maxY - minY;
+  if (count < 200 || footWidth < 20 || footHeight < 10) {
+    // Not enough signal — stay neutral instead of defaulting to "flat".
+    return { archRatio: 0.45, archProfile: [], archConfidence: 0 };
+  }
 
+  // Sample the bottom contour of the foot across its length.
+  const numSamples = 24;
+  const bottom: number[] = [];
   for (let s = 0; s < numSamples; s++) {
-    const x = bounds.minX + Math.round((footWidth * (s + 0.5)) / numSamples);
-    let lowestFootY = -1;
-
-    for (let y = bounds.minY; y <= bounds.maxY; y++) {
-      const i = (y * width + x) * 4;
-      const b = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
-      if (b < 200) lowestFootY = y;
+    const x = minX + Math.round((footWidth * (s + 0.5)) / numSamples);
+    let lowest = -1;
+    for (let y = minY; y <= maxY; y++) {
+      if (isFootPx(x, y)) lowest = y;
     }
-
-    if (lowestFootY >= 0) {
-      const gap = bounds.maxY - lowestFootY;
-      profile.push(gap / footHeight);
-    } else {
-      profile.push(0);
-    }
+    bottom.push(lowest);
   }
 
-  // Weighted arch score: emphasize the middle samples (arch region) more than heel/toe
-  const weights = [0.3, 0.5, 0.8, 1.2, 1.5, 1.5, 1.2, 0.8, 0.5, 0.3];
-  let weightedSum = 0;
-  let weightTotal = 0;
-  for (let i = 0; i < profile.length && i < weights.length; i++) {
-    weightedSum += profile[i] * weights[i];
-    weightTotal += weights[i];
+  const valid = bottom.filter((y) => y >= 0);
+  if (valid.length < numSamples * 0.6) {
+    return { archRatio: 0.45, archProfile: [], archConfidence: 0.15 };
   }
 
-  const archRatio = Math.min((weightedSum / weightTotal) / 0.35, 1);
-  return { archRatio, archProfile: profile };
+  // Ground line = the contact plane (robust: 90th percentile of the bottom contour).
+  const sortedBottom = [...valid].sort((a, b) => a - b);
+  const groundY = sortedBottom[Math.floor(sortedBottom.length * 0.9)];
+
+  // Lift of each sample above the ground line, normalised by foot height.
+  const profile = bottom.map((y) => (y < 0 ? 0 : Math.max(0, groundY - y) / footHeight));
+
+  // The arch lives in the middle 30–70% of the foot length.
+  const midStart = Math.floor(numSamples * 0.3);
+  const midEnd = Math.ceil(numSamples * 0.7);
+  const mid = profile.slice(midStart, midEnd);
+  const midLift = mid.reduce((a, b) => a + b, 0) / Math.max(1, mid.length);
+  const peakLift = Math.max(...mid, 0);
+
+  // Blend average and peak lift: a true arch has a sustained gap with a clear apex.
+  // A fully flat foot sits on the ground across the midfoot (lift ≈ 0).
+  // A high arch lifts roughly 25%+ of foot height off the ground at the apex.
+  const lift = midLift * 0.6 + peakLift * 0.4;
+  const archRatio = Math.min(Math.max(lift / 0.22, 0), 1);
+
+  // Confidence: a side view should be clearly longer than tall, well filled and
+  // have a contour that actually varies (a straight contour means we failed to segment).
+  const aspect = footWidth / Math.max(1, footHeight);
+  const contourRange = Math.max(...profile) - Math.min(...profile);
+  let archConfidence = 0.35;
+  if (aspect > 1.2) archConfidence += 0.25;
+  if (count > width * height * 0.05) archConfidence += 0.2;
+  if (contourRange > 0.04) archConfidence += 0.2;
+  archConfidence = Math.min(archConfidence, 1);
+
+  return { archRatio, archProfile: profile, archConfidence };
 }
+
 
 // Analyze the top-down image for width, shape, and ruler-based length.
 function analyzeTopImage(img: HTMLImageElement): {
