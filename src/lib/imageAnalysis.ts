@@ -360,53 +360,90 @@ function findFootBounds(data: ImageData) {
 }
 
 // Measure the arch profile from the side image.
-// Instead of a single average gap, we sample the arch curve at 10 points along the foot length
-// and compute a weighted arch score that emphasizes the mid-foot region.
-function analyzeSideImage(img: HTMLImageElement): { archRatio: number; archProfile: number[] } {
+// The arch is measured RELATIVE to the ground line (the lowest contact points at the
+// heel and the ball), which is far more robust than absolute pixel brightness: it works
+// on dark or busy backgrounds and survives shadows.
+function analyzeSideImage(img: HTMLImageElement): {
+  archRatio: number;
+  archProfile: number[];
+  archConfidence: number; // 0-1, how much we should trust archRatio
+} {
   const imageData = getImageData(img, 500);
-  const { data: pixels, width } = imageData;
-  const bounds = findFootBounds(imageData);
+  const { width, height } = imageData;
+  const bgColor = detectBackgroundColor(imageData);
 
-  if (bounds.footPixelCount === 0) return { archRatio: 0.5, archProfile: [] };
+  const isFootPx = (x: number, y: number) => colorDistance(pixelAt(imageData, x, y), bgColor) > 45;
 
-  const footHeight = bounds.maxY - bounds.minY;
-  const footWidth = bounds.maxX - bounds.minX;
-  if (footHeight < 10 || footWidth < 10) return { archRatio: 0.5, archProfile: [] };
+  // Bounding box of the foreground using background-distance (adaptive to any background).
+  let minX = width, maxX = 0, minY = height, maxY = 0, count = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!isFootPx(x, y)) continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+      count++;
+    }
+  }
 
-  // Sample 10 columns across the foot, measuring the gap at each
-  const numSamples = 10;
-  const profile: number[] = [];
+  const footWidth = maxX - minX;
+  const footHeight = maxY - minY;
+  if (count < 200 || footWidth < 20 || footHeight < 10) {
+    // Not enough signal — stay neutral instead of defaulting to "flat".
+    return { archRatio: 0.45, archProfile: [], archConfidence: 0 };
+  }
 
+  // Sample the bottom contour of the foot across its length.
+  const numSamples = 24;
+  const bottom: number[] = [];
   for (let s = 0; s < numSamples; s++) {
-    const x = bounds.minX + Math.round((footWidth * (s + 0.5)) / numSamples);
-    let lowestFootY = -1;
-
-    for (let y = bounds.minY; y <= bounds.maxY; y++) {
-      const i = (y * width + x) * 4;
-      const b = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
-      if (b < 200) lowestFootY = y;
+    const x = minX + Math.round((footWidth * (s + 0.5)) / numSamples);
+    let lowest = -1;
+    for (let y = minY; y <= maxY; y++) {
+      if (isFootPx(x, y)) lowest = y;
     }
-
-    if (lowestFootY >= 0) {
-      const gap = bounds.maxY - lowestFootY;
-      profile.push(gap / footHeight);
-    } else {
-      profile.push(0);
-    }
+    bottom.push(lowest);
   }
 
-  // Weighted arch score: emphasize the middle samples (arch region) more than heel/toe
-  const weights = [0.3, 0.5, 0.8, 1.2, 1.5, 1.5, 1.2, 0.8, 0.5, 0.3];
-  let weightedSum = 0;
-  let weightTotal = 0;
-  for (let i = 0; i < profile.length && i < weights.length; i++) {
-    weightedSum += profile[i] * weights[i];
-    weightTotal += weights[i];
+  const valid = bottom.filter((y) => y >= 0);
+  if (valid.length < numSamples * 0.6) {
+    return { archRatio: 0.45, archProfile: [], archConfidence: 0.15 };
   }
 
-  const archRatio = Math.min((weightedSum / weightTotal) / 0.35, 1);
-  return { archRatio, archProfile: profile };
+  // Ground line = the contact plane (robust: 90th percentile of the bottom contour).
+  const sortedBottom = [...valid].sort((a, b) => a - b);
+  const groundY = sortedBottom[Math.floor(sortedBottom.length * 0.9)];
+
+  // Lift of each sample above the ground line, normalised by foot height.
+  const profile = bottom.map((y) => (y < 0 ? 0 : Math.max(0, groundY - y) / footHeight));
+
+  // The arch lives in the middle 30–70% of the foot length.
+  const midStart = Math.floor(numSamples * 0.3);
+  const midEnd = Math.ceil(numSamples * 0.7);
+  const mid = profile.slice(midStart, midEnd);
+  const midLift = mid.reduce((a, b) => a + b, 0) / Math.max(1, mid.length);
+  const peakLift = Math.max(...mid, 0);
+
+  // Blend average and peak lift: a true arch has a sustained gap with a clear apex.
+  // A fully flat foot sits on the ground across the midfoot (lift ≈ 0).
+  // A high arch lifts roughly 25%+ of foot height off the ground at the apex.
+  const lift = midLift * 0.6 + peakLift * 0.4;
+  const archRatio = Math.min(Math.max(lift / 0.22, 0), 1);
+
+  // Confidence: a side view should be clearly longer than tall, well filled and
+  // have a contour that actually varies (a straight contour means we failed to segment).
+  const aspect = footWidth / Math.max(1, footHeight);
+  const contourRange = Math.max(...profile) - Math.min(...profile);
+  let archConfidence = 0.35;
+  if (aspect > 1.2) archConfidence += 0.25;
+  if (count > width * height * 0.05) archConfidence += 0.2;
+  if (contourRange > 0.04) archConfidence += 0.2;
+  archConfidence = Math.min(archConfidence, 1);
+
+  return { archRatio, archProfile: profile, archConfidence };
 }
+
 
 // Analyze the top-down image for width, shape, and ruler-based length.
 function analyzeTopImage(img: HTMLImageElement): {
@@ -520,12 +557,15 @@ function classifyFootType(
   widthRatio: number,
   heelWidthRatio: number,
   toeShapeRatio: number,
+  archConfidence: number,
 ): {
   footType: ImageAnalysis['footType'];
   archHeightPercent: number;
   pronation: string;
 } {
-  const archPercent = Math.round(archRatio * 100);
+  // Report the arch on a human scale where ~45-60% is a normal arch, so a weak
+  // segmentation never reads as a 0% (completely collapsed) arch.
+  const archPercent = Math.round(Math.min(100, Math.max(5, archRatio * 100)));
 
   // Score each foot type based on how well the features match
   const scores: Record<ImageAnalysis['footType'], number> = {
@@ -536,30 +576,34 @@ function classifyFootType(
     supination: 0,
   };
 
-  // Arch ratio scoring (primary signal)
-  // flat: <0.15, overpronation: 0.15-0.30 + wide, normal: 0.30-0.55, high: 0.55-0.75, supination: >0.75
-  if (archRatio < 0.15) scores.flat_foot += 3;
-  else if (archRatio < 0.22) { scores.flat_foot += 1.5; scores.overpronation += 1.5; }
-  else if (archRatio < 0.30) { scores.overpronation += 2.5; scores.flat_foot += 0.5; }
-  else if (archRatio < 0.40) { scores.normal_arch += 2; scores.overpronation += 1; }
-  else if (archRatio < 0.55) scores.normal_arch += 3;
-  else if (archRatio < 0.70) { scores.high_arch += 2.5; scores.supination += 0.5; }
-  else { scores.supination += 2.5; scores.high_arch += 1; }
+  // Arch ratio scoring (primary signal), weighted by how much we trust the side image.
+  // A flat foot is only called when the midfoot genuinely sits on the ground.
+  const w = 3 * Math.max(0.25, archConfidence);
+  if (archRatio < 0.08) { scores.flat_foot += w; scores.overpronation += w * 0.4; }
+  else if (archRatio < 0.18) { scores.overpronation += w * 0.8; scores.flat_foot += w * 0.5; }
+  else if (archRatio < 0.32) { scores.overpronation += w * 0.6; scores.normal_arch += w * 0.7; }
+  else if (archRatio < 0.62) scores.normal_arch += w;
+  else if (archRatio < 0.82) { scores.high_arch += w * 0.9; scores.normal_arch += w * 0.3; }
+  else { scores.high_arch += w * 0.7; scores.supination += w * 0.7; }
+
+  // When the side image is unreliable, pull the answer toward the population norm
+  // (normal arch) instead of letting weak pixels decide.
+  scores.normal_arch += (1 - Math.min(archConfidence, 1)) * 2.5;
 
   // Width ratio scoring (secondary signal)
   // Wide foot (>0.42) suggests overpronation/flat; narrow (<0.35) suggests supination/high arch
-  if (widthRatio > 0.45) { scores.overpronation += 1.5; scores.flat_foot += 1; }
-  else if (widthRatio > 0.40) { scores.overpronation += 0.8; scores.flat_foot += 0.5; }
-  else if (widthRatio > 0.35) scores.normal_arch += 1;
-  else if (widthRatio > 0.30) { scores.high_arch += 0.8; scores.normal_arch += 0.5; }
-  else { scores.supination += 1.5; scores.high_arch += 1; }
+  if (widthRatio > 0.45) { scores.overpronation += 1.2; scores.flat_foot += 0.5; }
+  else if (widthRatio > 0.40) { scores.overpronation += 0.6; scores.normal_arch += 0.3; }
+  else if (widthRatio > 0.34) scores.normal_arch += 1;
+  else if (widthRatio > 0.29) { scores.high_arch += 0.8; scores.normal_arch += 0.5; }
+  else { scores.supination += 1.2; scores.high_arch += 0.8; }
 
   // Heel width ratio (wide heel relative to ball = flatter foot)
-  if (heelWidthRatio > 0.65) { scores.flat_foot += 0.5; scores.overpronation += 0.5; }
-  else if (heelWidthRatio < 0.45) { scores.high_arch += 0.5; scores.supination += 0.5; }
+  if (heelWidthRatio > 0.7) { scores.flat_foot += 0.4; scores.overpronation += 0.4; }
+  else if (heelWidthRatio < 0.45) { scores.high_arch += 0.5; scores.supination += 0.4; }
 
   // Toe shape (square toes = wider forefoot = flatter)
-  if (toeShapeRatio > 0.85) { scores.flat_foot += 0.3; scores.overpronation += 0.3; }
+  if (toeShapeRatio > 0.88) { scores.flat_foot += 0.2; scores.overpronation += 0.3; }
   else if (toeShapeRatio < 0.6) { scores.high_arch += 0.3; scores.supination += 0.3; }
 
   // Pick the highest-scoring type
@@ -571,6 +615,9 @@ function classifyFootType(
       footType = type as ImageAnalysis['footType'];
     }
   }
+
+  // Guard rail: never report a collapsed arch off a low-confidence side image.
+  if (footType === 'flat_foot' && archConfidence < 0.5) footType = 'overpronation';
 
   const pronationMap: Record<string, string> = {
     flat_foot: 'Moderate inward roll',
@@ -590,7 +637,7 @@ function classifyFootType(
 export async function analyzeFootImages(topImageSrc: string, sideImageSrc: string): Promise<ImageAnalysis> {
   const [topImg, sideImg] = await Promise.all([loadImage(topImageSrc), loadImage(sideImageSrc)]);
 
-  const { archRatio } = analyzeSideImage(sideImg);
+  const { archRatio, archConfidence } = analyzeSideImage(sideImg);
   const top = analyzeTopImage(topImg);
   const topQuality = assessImageQuality(topImg);
   const sideQuality = assessImageQuality(sideImg);
@@ -601,6 +648,8 @@ export async function analyzeFootImages(topImageSrc: string, sideImageSrc: strin
     top.widthRatio,
     top.heelWidthRatio,
     top.toeShapeRatio,
+    archConfidence,
+
   );
 
   return {

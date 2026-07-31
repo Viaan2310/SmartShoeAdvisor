@@ -35,10 +35,18 @@ export type AiFootAnalysis = z.infer<typeof AiFootSchema>;
 
 const SYSTEM_PROMPT = `You are a podiatry-grade foot-morphology classifier. You receive two photographs of ONE foot: a TOP (dorsal/plantar-facing) view and a SIDE (medial) view. Classify the foot for footwear fitting and return ONLY JSON matching the schema.
 
+BASE RATES — respect them. In the general adult population roughly:
+- 60% normal_arch, 15% overpronation, 12% high_arch, 8% flat_foot, 5% supination.
+"flat_foot" (pes planus) is UNCOMMON and clinically specific. Do NOT default to it. A photo that is
+dim, shadowed, low-angle, or taken with the foot partly occluded is NOT evidence of a flat foot — it is
+evidence of a poor photo. When the arch is not clearly visible, answer normal_arch with lower confidence.
+
 STEP 1 — Read the side view (medial arch):
 - Locate the heel pad, the medial arch gap and the ball of the foot.
-- Estimate the arch gap height as a fraction of foot length. Typical bands:
-  * gap barely visible / sole touches ground along the midfoot -> flat
+- Measure the arch gap RELATIVE to the ground contact line under the heel and the ball, not against the
+  background. Shadow under the arch still counts as a gap.
+- Bands (gap apex height as a fraction of foot height at the ankle):
+  * no visible gap, midfoot skin/sole in contact with the surface across its whole length -> flat
   * shallow but continuous gap -> low-normal
   * clear, well-defined curve -> normal
   * tall gap, midfoot lifted well off the surface -> high
@@ -47,9 +55,9 @@ STEP 1 — Read the side view (medial arch):
 STEP 2 — Read the top view (midfoot width / footprint):
 - Compare midfoot width to forefoot (ball) width. This is the arch index proxy:
   archIndex = midfoot width / forefoot width, roughly 0.00–1.00.
-  * archIndex > 0.30 -> flat / collapsed arch
-  * 0.21–0.30 -> normal
-  * < 0.21 -> high arch / cavus
+  * archIndex > 0.34 -> flat / collapsed arch
+  * 0.22–0.34 -> normal
+  * < 0.22 -> high arch / cavus
 - Note toe splay, hallux (big toe) angle, forefoot spread, heel width.
 
 STEP 3 — Alignment (pronation):
@@ -57,16 +65,18 @@ STEP 3 — Alignment (pronation):
 - Inward collapse of the ankle + medial bulge -> overpronation.
 - Outward tilt + weight on the lateral edge + narrow midfoot -> supination.
 
-STEP 4 — Reconcile before classifying. The two views must agree:
-- flat_foot: archHeightPercent <= 22 AND archIndex >= 0.30, without obvious inward ankle roll.
-- overpronation: low/collapsed arch PLUS visible inward ankle/heel roll (this beats flat_foot when roll is visible).
-- normal_arch: archHeightPercent 23–60 and archIndex 0.21–0.30.
-- high_arch: archHeightPercent >= 61 AND archIndex <= 0.20, heel/ankle roughly vertical.
+STEP 4 — Reconcile before classifying. BOTH views must support the call:
+- flat_foot: REQUIRES archHeightPercent <= 20 AND archIndex >= 0.34 AND you can state, in observations,
+  that the midfoot visibly touches the ground in the side view. If any one of these is missing, do NOT
+  return flat_foot — return overpronation (if inward roll is visible) or normal_arch.
+- overpronation: low-to-moderate arch PLUS visible inward ankle/heel roll or medial bulge.
+- normal_arch: archHeightPercent 21–62 and archIndex 0.22–0.34. This is the default when evidence is mixed.
+- high_arch: archHeightPercent >= 63 AND archIndex <= 0.21, heel/ankle roughly vertical.
 - supination: high arch PLUS outward roll / lateral weight bearing.
 If the two views disagree, trust the SIDE view for arch height and the TOP view for width, then lower confidence.
 
 FIELD RULES:
-- archHeightPercent: 0 (fully flat) to 100 (extreme cavus). Must be numerically consistent with footType per the bands above.
+- archHeightPercent: 0 (fully flat) to 100 (extreme cavus). Must be numerically consistent with footType per the bands above. Only use values below 15 for a genuinely collapsed arch.
 - archIndex: the midfoot/forefoot width ratio you measured (0–1, two decimals).
 - pronation: one short phrase, e.g. "Neutral", "Mild inward roll", "Excessive inward roll", "Outward roll (underpronation)".
 - pronationDegree: neutral | mild_over | severe_over | mild_under | severe_under, matching the phrase.
@@ -74,10 +84,11 @@ FIELD RULES:
 - confidence: 0–100. Be honest: below 60 when a view is cropped, blurry, angled or the arch is hidden.
 - widthCategory: narrow | medium | wide, using width/length ratio (<0.36 narrow, 0.36–0.41 medium, >0.41 wide).
 - toeShape: egyptian (big toe longest), greek (2nd toe longest), roman (first three even), unclear.
-- observations: 2–4 short factual visual notes, each citing something you actually see.
+- observations: 2–4 short factual visual notes, each citing something you actually see. If you return flat_foot, one observation MUST describe the midfoot ground contact.
 - reasoning: 1–2 sentences tying the side-view arch and the top-view width to the final class.
 
-Be decisive and quantitative. Never refuse; if the photos are poor, still commit to the most probable class and lower confidence.`;
+Be decisive and quantitative, but never let a bad photo become a flat-foot diagnosis.`;
+
 
 const RANK: Record<z.infer<typeof FootTypeEnum>, number> = {
   flat_foot: 0,
@@ -119,6 +130,39 @@ function reconcile(a: AiFootAnalysis, b: AiFootAnalysis): AiFootAnalysis {
     observations: primary.observations.slice(0, 4),
   };
 }
+
+// Enforce the rubric server-side so a model that reflexively answers "flat_foot"
+// still has to produce measurements that support it.
+function enforceConsistency(r: AiFootAnalysis): AiFootAnalysis {
+  const out = { ...r };
+
+  if (out.footType === 'flat_foot') {
+    const supported = out.archHeightPercent <= 20 && out.archIndex >= 0.34;
+    const lowQuality = out.imageQuality < 55 || out.confidence < 55;
+    if (!supported || lowQuality) {
+      const rolls = out.pronationDegree === 'mild_over' || out.pronationDegree === 'severe_over';
+      out.footType = rolls ? 'overpronation' : 'normal_arch';
+      out.archHeightPercent = Math.max(out.archHeightPercent, rolls ? 30 : 45);
+      out.pronation = rolls ? 'Excessive inward roll' : 'Balanced neutral roll';
+      out.reasoning = `${out.reasoning} Arch measurements did not meet the collapsed-arch threshold, so the classification was reduced to ${out.footType.replace('_', ' ')}.`;
+      out.confidence = Math.max(35, out.confidence - 8);
+    }
+  }
+
+  // Keep the reported arch percentage inside the band of the final class.
+  const bands: Record<AiFootAnalysis['footType'], [number, number]> = {
+    flat_foot: [0, 20],
+    overpronation: [21, 45],
+    normal_arch: [40, 62],
+    high_arch: [63, 85],
+    supination: [65, 95],
+  };
+  const [lo, hi] = bands[out.footType];
+  out.archHeightPercent = Math.min(hi, Math.max(lo, Math.round(out.archHeightPercent)));
+
+  return out;
+}
+
 
 export const analyzeFootWithAI = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => InputSchema.parse(input))
@@ -165,9 +209,9 @@ export const analyzeFootWithAI = createServerFn({ method: 'POST' })
       // Two independent passes → self-consistency check, which markedly reduces
       // borderline flat_foot / overpronation and high_arch / supination mistakes.
       const [first, second] = await Promise.allSettled([runPass(0.1), runPass(0.6)]);
-      const a = first.status === 'fulfilled' ? first.value : null;
-      const b = second.status === 'fulfilled' ? second.value : null;
-      if (a && b) return reconcile(a, b);
+      const a = first.status === 'fulfilled' && first.value ? enforceConsistency(first.value) : null;
+      const b = second.status === 'fulfilled' && second.value ? enforceConsistency(second.value) : null;
+      if (a && b) return enforceConsistency(reconcile(a, b));
       return a ?? b;
     } catch (error) {
       if (NoObjectGeneratedError.isInstance(error)) {
