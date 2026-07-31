@@ -131,6 +131,39 @@ function reconcile(a: AiFootAnalysis, b: AiFootAnalysis): AiFootAnalysis {
   };
 }
 
+// Enforce the rubric server-side so a model that reflexively answers "flat_foot"
+// still has to produce measurements that support it.
+function enforceConsistency(r: AiFootAnalysis): AiFootAnalysis {
+  const out = { ...r };
+
+  if (out.footType === 'flat_foot') {
+    const supported = out.archHeightPercent <= 20 && out.archIndex >= 0.34;
+    const lowQuality = out.imageQuality < 55 || out.confidence < 55;
+    if (!supported || lowQuality) {
+      const rolls = out.pronationDegree === 'mild_over' || out.pronationDegree === 'severe_over';
+      out.footType = rolls ? 'overpronation' : 'normal_arch';
+      out.archHeightPercent = Math.max(out.archHeightPercent, rolls ? 30 : 45);
+      out.pronation = rolls ? 'Excessive inward roll' : 'Balanced neutral roll';
+      out.reasoning = `${out.reasoning} Arch measurements did not meet the collapsed-arch threshold, so the classification was reduced to ${out.footType.replace('_', ' ')}.`;
+      out.confidence = Math.max(35, out.confidence - 8);
+    }
+  }
+
+  // Keep the reported arch percentage inside the band of the final class.
+  const bands: Record<AiFootAnalysis['footType'], [number, number]> = {
+    flat_foot: [0, 20],
+    overpronation: [21, 45],
+    normal_arch: [40, 62],
+    high_arch: [63, 85],
+    supination: [65, 95],
+  };
+  const [lo, hi] = bands[out.footType];
+  out.archHeightPercent = Math.min(hi, Math.max(lo, Math.round(out.archHeightPercent)));
+
+  return out;
+}
+
+
 export const analyzeFootWithAI = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }): Promise<AiFootAnalysis | null> => {
