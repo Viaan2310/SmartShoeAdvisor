@@ -1,28 +1,60 @@
 import { shoeCatalog, footTypes, type ActivityId, type FootTypeId, type AnalysisResult, type ShoeRecommendation } from '@/data/shoes';
 import { analyzeFootImages, type ImageAnalysis } from '@/lib/imageAnalysis';
 
-// ── Mondopoint shoe size conversion (the standard used by shoe brands) ──
-// Real foot length → UK/US/EU via the Mondopoint system. Adds the standard
-// 1.5cm allowance between foot length and shoe internal length.
+// ── Shoe size conversion ──
+// All four scales are derived from one anchored chart (adult men's, Nike/standard
+// retail conversions) so UK / US / EU / IND always agree with each other instead of
+// each being computed from its own formula.
+
+// [foot length cm, UK, US men, EU]
+const SIZE_CHART: [number, number, number, number][] = [
+  [21.0, 2.0, 3.0, 34.5],
+  [22.0, 3.0, 4.0, 36.0],
+  [23.0, 4.0, 5.0, 37.0],
+  [24.0, 5.0, 6.0, 38.5],
+  [25.0, 6.0, 7.0, 40.0],
+  [26.0, 7.0, 8.0, 41.0],
+  [27.0, 8.0, 9.0, 42.5],
+  [28.0, 9.0, 10.0, 44.0],
+  [29.0, 10.0, 11.0, 45.0],
+  [30.0, 11.0, 12.0, 46.0],
+  [31.0, 12.0, 13.0, 47.5],
+  [32.0, 13.0, 14.0, 48.5],
+];
+
+function interpolate(cm: number, index: 1 | 2 | 3): number {
+  const first = SIZE_CHART[0];
+  const last = SIZE_CHART[SIZE_CHART.length - 1];
+  if (cm <= first[0]) return first[index];
+  if (cm >= last[0]) return last[index];
+
+  for (let i = 0; i < SIZE_CHART.length - 1; i++) {
+    const a = SIZE_CHART[i];
+    const b = SIZE_CHART[i + 1];
+    if (cm >= a[0] && cm <= b[0]) {
+      const t = (cm - a[0]) / (b[0] - a[0]);
+      return a[index] + t * (b[index] - a[index]);
+    }
+  }
+  return last[index];
+}
 
 function lengthToSizes(footLengthCm: number) {
-  const shoeInternal = footLengthCm + 1.5; // standard toe allowance
+  const half = (n: number) => Math.round(n * 2) / 2;
+  const fmt = (n: number) => (Number.isInteger(n) ? n.toFixed(0) : n.toFixed(1));
 
-  // UK: (shoeInternal − 22) / (1/3 inch in cm) → UK size
-  const uk = (shoeInternal - 22) / 0.8467;
-  // US Men: UK + 1
-  const us = uk + 1;
-  // EU: (shoeInternal × 1.5) + 2 → EU size (Paris point system)
-  const eu = (shoeInternal * 1.5) + 2;
-
-  const fmt = (n: number) => {
-    const rounded = Math.round(n * 2) / 2; // round to nearest half
-    return Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1);
-  };
+  // Round UK first, then derive the other scales from the SAME rounded step so
+  // the four labels always describe one identical shoe.
+  const ukRaw = interpolate(footLengthCm, 1);
+  const uk = half(ukRaw);
+  const us = half(uk + 1); // US men = UK + 1 across the whole chart
+  // EU comes from the chart row matching the rounded UK size (keeps 1 UK step ≈ 1.25 EU)
+  const eu = half(interpolate(footLengthCm + (uk - ukRaw), 3));
 
   // India uses the UK sizing scale
   return { uk: `UK ${fmt(uk)}`, us: `US ${fmt(us)}`, eu: `EU ${fmt(eu)}`, ind: `IND ${fmt(uk)}` };
 }
+
 
 // ── Shoe scoring engine ──
 // Scores every shoe in the activity catalog against the user's specific foot metrics.
