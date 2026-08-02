@@ -1,0 +1,16 @@
+{
+  "name": "Stride AI — Foot Scan & Shoe Fit",
+  "short_name": "Stride AI",
+  "description": "Scan your feet and get personalized shoe recommendations with exact UK/US/EU/IND sizing.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0e1a",
+  "theme_color": "#2563eb",
+  "icons": [
+    { "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
