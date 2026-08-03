@@ -2,5 +2,3 @@
   command = "bun run build"
   publish = "dist/client"
 
-[build.environment]
-  NITRO_PRESET = "netlify"
