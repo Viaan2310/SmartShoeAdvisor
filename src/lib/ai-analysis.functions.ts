@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { generateText, Output, NoObjectGeneratedError } from 'ai';
 import { z } from 'zod';
-import { createLovableAiGatewayProvider } from './ai-gateway.server';
+import { resolveVisionModel } from './ai-gateway.server';
 
 const InputSchema = z.object({
   activity: z.string(),
@@ -167,11 +167,9 @@ function enforceConsistency(r: AiFootAnalysis): AiFootAnalysis {
 export const analyzeFootWithAI = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }): Promise<AiFootAnalysis | null> => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) return null;
+    const model = resolveVisionModel();
+    if (!model) return null;
 
-    const gateway = createLovableAiGatewayProvider(key, { structuredOutputs: true });
-    const model = gateway('openai/gpt-5.6-sol');
 
     const manualLine = data.manual
       ? `Verified manual calibration: foot length = ${data.manual.footLengthCm.toFixed(1)} cm, foot width = ${data.manual.footWidthCm.toFixed(
