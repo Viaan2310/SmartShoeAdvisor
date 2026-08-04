@@ -58,12 +58,15 @@ export default function InstallAppButton() {
               <button onClick={() => setShowHelp(false)} aria-label="Close"><X size={20} /></button>
             </div>
             <ol className="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+              <li>
+                <strong>Android (Chrome):</strong> open the ⋮ menu → tap{' '}
+                <strong>Install app</strong> or <strong>Add to Home screen</strong>.
+              </li>
               <li className="flex items-start gap-2">
                 <Share2 size={16} className="mt-0.5 text-blue-500 shrink-0" />
-                <span>On iPhone/iPad: tap the <strong>Share</strong> icon in Safari.</span>
+                <span><strong>iPhone/iPad (Safari):</strong> tap the <strong>Share</strong> icon, then <strong>Add to Home Screen</strong>.</span>
               </li>
-              <li>Choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</li>
-              <li>On Android/desktop Chrome: open the browser menu and pick <strong>Install app</strong>.</li>
+              <li><strong>Desktop Chrome/Edge:</strong> click the install icon in the address bar.</li>
             </ol>
             <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
               The app then opens full screen from your home screen, just like a native app.
