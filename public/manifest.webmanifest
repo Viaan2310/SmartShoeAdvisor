@@ -1,6 +1,6 @@
 {
-  "name": "Stride AI — Foot Scan & Shoe Fit",
-  "short_name": "Stride AI",
+  "name": "Smart Shoe Advisor — Foot Scan & Shoe Fit",
+  "short_name": "Smart Shoe Advisor",
   "description": "Scan your feet and get personalized shoe recommendations with exact UK/US/EU/IND sizing.",
   "start_url": "/",
   "scope": "/",
