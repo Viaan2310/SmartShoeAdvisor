@@ -8,6 +8,7 @@ import { loadHistory, deleteAnalysis, type SavedAnalysis } from '@/lib/history';
 import { getUserRating, saveUserRating, getRatingStats, type AppRating } from '@/lib/ratings';
 import { isCreator } from '@/lib/admin';
 import AdminPanel from '@/screens/AdminPanel';
+import InstallAppButton from '@/components/InstallAppButton';
 
 const features = [
   { icon: Scan, title: 'AI Foot Analysis', desc: 'Advanced computer vision scans your foot in seconds', gradient: 'from-blue-500 to-cyan-500' },
@@ -219,6 +220,7 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
                 <Brain size={20} className="text-blue-500 group-hover:scale-110 transition-transform" />
                 How It Works
               </button>
+              <InstallAppButton />
             </div>
           </div>
 
