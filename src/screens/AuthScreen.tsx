@@ -72,7 +72,7 @@ export default function AuthScreen() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 text-center">
             {mode === 'signin'
               ? 'Sign in to access your saved analyses'
-              : 'Join Stride AI to save your foot analyses'}
+              : 'Join Smart Shoe Advisor to save your foot analyses'}
           </p>
         </div>
 

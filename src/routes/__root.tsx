@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover",
       },
-      { title: "Stride AI" },
+      { title: "Smart Shoe Advisor" },
       {
         name: "description",
         content:
@@ -90,7 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#2563eb" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-title", content: "Stride AI" },
+      { name: "apple-mobile-web-app-title", content: "Smart Shoe Advisor" },
       {
         name: "apple-mobile-web-app-status-bar-style",
         content: "black-translucent",

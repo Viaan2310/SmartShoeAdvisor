@@ -28,7 +28,7 @@ export default function Logo({ size = 'md' }: LogoProps) {
       </div>
       {size !== 'sm' && (
         <div className="flex flex-col leading-tight">
-          <span className={`${textSize[size]} font-bold gradient-text`}>Stride AI</span>
+          <span className={`${textSize[size]} font-bold gradient-text`}>Smart Shoe Advisor</span>
           {size === 'lg' && (
             <span className="text-sm text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1.5">
               <ScanLine size={12} className="text-cyan-500" />

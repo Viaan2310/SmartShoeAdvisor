@@ -5,13 +5,13 @@ import App from "@/App";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Stride AI — Personalized Shoe Recommendations" },
+      { title: "Smart Shoe Advisor — Personalized Shoe Recommendations" },
       {
         name: "description",
         content:
-          "Get personalized shoe recommendations based on your foot shape and activity with Stride AI.",
+          "Get personalized shoe recommendations based on your foot shape and activity with Smart Shoe Advisor.",
       },
-      { property: "og:title", content: "Stride AI — Personalized Shoe Recommendations" },
+      { property: "og:title", content: "Smart Shoe Advisor — Personalized Shoe Recommendations" },
       {
         property: "og:description",
         content:

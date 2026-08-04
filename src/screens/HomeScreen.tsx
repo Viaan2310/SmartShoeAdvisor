@@ -199,7 +199,7 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
             </div>
 
             <h1 className="text-4xl md:text-6xl font-bold leading-tight tracking-tight">
-              Stride <span className="gradient-text">AI</span>
+              Smart Shoe <span className="gradient-text">Advisor</span>
             </h1>
 
             <p className="text-xl font-bold text-black dark:text-white max-w-md leading-relaxed">
@@ -400,14 +400,14 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Based on {ratingStats.count} {ratingStats.count === 1 ? 'rating' : 'ratings'}</p>
               </>
             ) : (
-              <p className="text-gray-500 dark:text-gray-400">No ratings yet — be the first to rate Stride AI!</p>
+              <p className="text-gray-500 dark:text-gray-400">No ratings yet — be the first to rate Smart Shoe Advisor!</p>
             )}
             <button
               onClick={() => { setShowAppRatingModal(true); setRatingSubmitted(false); }}
               className="mt-6 btn-primary ripple group inline-flex items-center gap-2"
             >
               <Star size={18} className="group-hover:scale-110 transition-transform" />
-              {userRating ? 'Update Your Rating' : 'Rate Stride AI'}
+              {userRating ? 'Update Your Rating' : 'Rate Smart Shoe Advisor'}
             </button>
           </div>
         </div>
@@ -434,7 +434,7 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
       {/* Footer */}
       <footer className="border-t border-gray-200 dark:border-white/5 py-6">
         <div className="max-w-6xl mx-auto px-5 text-center">
-          <p className="text-sm text-gray-400">Stride AI. Built for innovation.</p>
+          <p className="text-sm text-gray-400">Smart Shoe Advisor. Built for innovation.</p>
         </div>
       </footer>
 
@@ -527,15 +527,15 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
                   <Star size={32} className="text-green-500 fill-green-500" />
                 </div>
                 <p className="font-semibold text-xl mb-1">Thank you for your feedback!</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Your rating helps us improve Stride AI.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Your rating helps us improve Smart Shoe Advisor.</p>
               </div>
             ) : (
               <div className="text-center">
                 <div className="inline-flex items-center gap-2 glass px-3 py-1.5 rounded-full mb-4">
                   <Star size={14} className="text-amber-500 fill-amber-500" />
-                  <span className="text-xs font-medium text-gray-600 dark:text-gray-300">{userRating ? 'Update Your Rating' : 'Rate Stride AI'}</span>
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-300">{userRating ? 'Update Your Rating' : 'Rate Smart Shoe Advisor'}</span>
                 </div>
-                <h3 className="font-bold text-xl mb-1">{userRating ? 'Update your rating' : 'How would you rate Stride AI?'}</h3>
+                <h3 className="font-bold text-xl mb-1">{userRating ? 'Update your rating' : 'How would you rate Smart Shoe Advisor?'}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Your honest feedback helps us improve.</p>
                 <div className="flex items-center justify-center gap-2 mb-6">
                   {[1, 2, 3, 4, 5].map((s) => (
