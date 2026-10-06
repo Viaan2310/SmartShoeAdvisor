@@ -1,3 +1,4 @@
+import AdvisorProgress from '@/components/AdvisorProgress';
 import Button from '@/components/AdvisorButton';
 import HomeButton from '@/components/HomeButton';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -34,19 +35,19 @@ const stepInfo: Record<LineId, { title: string; hint: string; color: string; rin
   ruler: {
     title: 'Mark the 30 cm ruler',
     hint: 'Drag the two handles onto the 0 cm and 30 cm marks on your ruler.',
-    color: '#22d3ee',
+    color: 'var(--primary)' ,
     ring: 'ring-primary',
   },
   length: {
     title: 'Mark your foot length',
     hint: 'Place one handle at the back of your heel and the other at the tip of your longest toe.',
-    color: '#60a5fa',
+    color: 'var(--measurement-length)' ,
     ring: 'ring-primary',
   },
   width: {
     title: 'Mark your foot width',
     hint: 'Place the handles across the widest part of your foot (the ball).',
-    color: '#f472b6',
+    color: 'var(--measurement-width)' ,
     ring: 'ring-measurement-width',
   },
 };
@@ -173,12 +174,12 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
   const info = stepInfo[currentLine];
 
   return (
-    <div className="min-h-screen flex flex-col px-5 py-6 gap-5">
-      <header className="flex items-center gap-3">
+    <div className="calibration-shell min-h-screen flex flex-col gap-5">
+      <header className="flex items-center gap-3 min-w-0">
         <Button onClick={back} className="h-10 w-10 rounded-full glass-card flex items-center justify-center ripple" aria-label="Back">
           <ArrowLeft size={18} />
         </Button>
-        <div>
+        <div className="min-w-0">
           <h1 className="text-lg font-bold">Calibrate measurements</h1>
           <p className="text-xs text-muted-foreground dark:text-muted-foreground">Step {stepIdx + 1} of {steps.length}</p>
         </div>
@@ -190,6 +191,7 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
         </div>
       </header>
 
+      <AdvisorProgress current={1} />
       {/* Step chips */}
       <div className="flex gap-2">
         {steps.map((s, i) => {
@@ -199,8 +201,7 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
             <Button
               key={s}
               onClick={() => setStepIdx(i)}
-              className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all
-                ${active ? 'bg-primary text-primary-foreground shadow-lg' : done ? 'glass-card' : 'glass-card opacity-60'}`}
+              className="calibration-step" aria-pressed={active}
             >
               <div className="flex items-center justify-center gap-1.5">
                 {done ? <Check size={14} /> : s === 'ruler' ? <Ruler size={14} /> : <Move size={14} />}
@@ -211,6 +212,7 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
         })}
       </div>
 
+      <div className="calibration-workspace">
       {/* Image + overlay */}
       <div
         ref={containerRef}
@@ -271,10 +273,10 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
                 left: `${mx}%`,
                 top: `${my}%`,
                 color: c,
-                borderColor: `${c}80`,
+                borderColor: c,
                 opacity: isActive ? 1 : 0.6,
                 zIndex: isActive ? 15 : 5,
-                boxShadow: isActive ? `0 0 12px ${c}66` : 'none',
+                boxShadow: 'none',
               }}
             >
               {label}
@@ -293,13 +295,14 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
               <Button
                 key={`${id}-${end}`}
                 onPointerDown={startDrag(id, end)}
+                onKeyDown={(e) => { const delta = e.shiftKey ? 0.02 : 0.005; const moves: Record<string, [number, number]> = { ArrowLeft: [-delta,0], ArrowRight: [delta,0], ArrowUp: [0,-delta], ArrowDown: [0,delta] }; const move = moves[e.key]; if (!move) return; e.preventDefault(); setLines(prev => ({ ...prev, [id]: { ...prev[id], [end]: { x: Math.max(0, Math.min(1, prev[id][end].x + move[0])), y: Math.max(0, Math.min(1, prev[id][end].y + move[1])) } } })); }}
                 aria-label={`${id} ${end === 'a' ? 'start' : 'end'} handle`}
                 className={`absolute -translate-x-1/2 -translate-y-1/2 h-8 w-8 rounded-full border-2 shadow-lg transition-transform ${isActive ? 'ring-2 ' + stepInfo[id].ring : ''}`}
                 style={{
                   left: `${p.x * 100}%`,
                   top: `${p.y * 100}%`,
                   borderColor: c,
-                  background: `radial-gradient(circle, ${c} 0%, ${c}55 55%, transparent 70%)`,
+                  background: c,
                   opacity: isActive ? 1 : 0.6,
                   zIndex: isActive ? 20 : 10,
                   touchAction: 'none',
@@ -330,8 +333,9 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
         )}
       </div>
 
+      <aside className="calibration-panel">
       {/* Instructions */}
-      <div className="glass-card p-4 rounded-lg">
+      <div className="calibration-tip">
         <div className="flex items-center gap-2 mb-1">
           <span className="h-2 w-2 rounded-full" style={{ background: info.color }} />
           <h2 className="text-sm font-bold">{info.title}</h2>
@@ -339,6 +343,8 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
         <p className="text-xs text-muted-foreground dark:text-muted-foreground">{info.hint}</p>
       </div>
 
+      {geom && <div className="calibration-values" aria-live="polite"><div className="measurement-value"><p>Scale · px/cm</p><strong>{geom.pixelsPerCm.toFixed(1)}</strong></div><div className="measurement-value"><p>Foot length · cm</p><strong>{geom.lengthCm.toFixed(1)}</strong></div><div className="measurement-value"><p>Foot width · cm</p><strong>{geom.widthCm.toFixed(1)}</strong></div></div>}
+      </aside></div>
       {/* Actions */}
       <div className="mt-auto flex gap-3">
         <Button onClick={back} className="flex-1 btn-secondary ripple">Back</Button>

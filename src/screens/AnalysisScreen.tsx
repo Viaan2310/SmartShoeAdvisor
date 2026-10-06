@@ -160,7 +160,7 @@ export default function AnalysisScreen({ activity, topImage, sideImage, manualMe
   const liveArch = Math.round((progress / 100) * 58);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-5 py-8">
+    <div className="scan-shell min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-5 py-8">
       <div className="absolute top-5 left-5 z-20">
         <HomeButton onClick={onHome} />
       </div>
@@ -168,7 +168,7 @@ export default function AnalysisScreen({ activity, topImage, sideImage, manualMe
 
       <div className="relative z-10 w-full max-w-md flex flex-col items-center gap-6">
         {/* Scan viewport — the cinematic foot scan */}
-        <div className="relative w-full max-w-xs aspect-square rounded-lg overflow-hidden glass-card p-2">
+        <div className="scan-viewport relative w-full aspect-square overflow-hidden glass-card p-2">
           <div className="relative w-full h-full rounded-lg overflow-hidden bg-foreground">
             {/* The actual foot image */}
             <img

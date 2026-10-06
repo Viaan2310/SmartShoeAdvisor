@@ -1,3 +1,5 @@
+import AdvisorHeader from '@/components/AdvisorHeader';
+import AdvisorProgress from '@/components/AdvisorProgress';
 import Button from '@/components/AdvisorButton';
 import { useRef, useState, useCallback } from 'react';
 import { Upload, Camera, Image as ImageIcon, X, ArrowRight, ArrowLeft, Info, Check } from 'lucide-react';
@@ -101,12 +103,12 @@ export default function UploadScreen({ onBack, onHome, onNext }: UploadScreenPro
             onDrop={(e) => handleDrop(e, slot)}
             onDragOver={(e) => { e.preventDefault(); setIsDragging(slot); }}
             onDragLeave={(e) => { e.preventDefault(); setIsDragging(null); }}
-            className={`glass-card border-2 border-dashed transition-all duration-300 p-6 md:p-8 text-center cursor-pointer min-h-[200px] flex flex-col items-center justify-center
+            role="button" tabIndex={0} aria-label={`Upload ${label}`} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileRef.current?.click(); } }} className={`upload-drop border-2 border-dashed transition-all duration-300 p-6 md:p-8 text-center cursor-pointer min-h-[200px] flex flex-col items-center justify-center
               ${isDragging === slot ? 'border-primary bg-primary/50 dark:bg-primary/10 scale-[1.02]' : 'border-border dark:border-card/10 hover:border-primary'}`}
             onClick={() => { activeSlotRef.current = slot; fileRef.current?.click(); }}
           >
-            <div className={`mx-auto h-14 w-14 rounded-lg bg-primary flex items-center justify-center mb-4 shadow-lg shadow-primary/30 transition-transform duration-300 ${isDragging === slot ? 'scale-110' : ''}`}>
-              <Upload size={26} className="text-primary-foreground" />
+            <div className="upload-icon mx-auto">
+              <Upload size={26} />
             </div>
             <p className="text-sm font-medium mb-1">Drag & Drop or tap to browse</p>
             <p className="text-xs text-muted-foreground mb-4">{instruction}</p>
@@ -159,7 +161,7 @@ export default function UploadScreen({ onBack, onHome, onNext }: UploadScreenPro
           </div>
         )}
 
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0], slot)} />
+        <input aria-label={`${label} photo`} ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0], slot)} />
         <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0], slot)} />
       </div>
     );
@@ -168,15 +170,7 @@ export default function UploadScreen({ onBack, onHome, onNext }: UploadScreenPro
   return (
     <div className="min-h-screen relative overflow-hidden">
 
-      <header className="sticky top-0 z-40 glass border-b border-border/60 dark:border-card/5">
-        <div className="max-w-4xl mx-auto px-5 py-4 flex items-center justify-between">
-          <Button onClick={onBack} className="glass-card p-2.5  transition-transform">
-            <ArrowLeft size={20} className="text-primary dark:text-primary" />
-          </Button>
-          <Logo size="sm" />
-          <HomeButton onClick={onHome} />
-        </div>
-      </header>
+      <AdvisorHeader onBack={onBack} onHome={onHome} />
 
       <div className="max-w-4xl mx-auto px-5 py-8">
         {/* Progress indicator */}
@@ -189,11 +183,11 @@ export default function UploadScreen({ onBack, onHome, onNext }: UploadScreenPro
           ))}
         </div>
 
-        <h2 className="text-2xl md:text-3xl font-bold mb-2">Upload Your Foot</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-2">Let’s get to know your feet.</h2>
         <p className="text-muted-foreground dark:text-muted-foreground mb-6">We need two photos for an accurate analysis</p>
 
         {/* Instructions */}
-        <div className="glass-card p-4 mb-6 flex items-start gap-3">
+        <div className="upload-guidance p-4 mb-6 flex items-start gap-3">
           <Info size={20} className="text-primary flex-shrink-0 mt-0.5" />
           <div className="text-sm text-muted-foreground dark:text-muted-foreground space-y-1">
             <p><strong>Top-down view:</strong> Place your foot on a plain white surface with a <strong>30 cm ruler</strong> beside it, and photograph from directly above.</p>
@@ -209,15 +203,15 @@ export default function UploadScreen({ onBack, onHome, onNext }: UploadScreenPro
         </div>
 
         {error && (
-          <div className="mt-4 glass-card p-4 border-l-4 border-destructive animate-fade-in">
+          <div role="alert" className="mt-4 glass-card p-4 border-l-4 border-destructive animate-fade-in">
             <p className="text-sm text-destructive dark:text-destructive">{error}</p>
           </div>
         )}
 
         {/* Continue button */}
-        <div className="sticky bottom-0 mt-8 pb-6 pt-4 bg-gradient-to-t from-muted dark:from-background to-transparent">
+        <div className="sticky bottom-0 flow-actions">
           <Button
-            onClick={() => bothReady && onNext(topImage.data!, sideImage.data!)}
+            onClick={() => { if (topImage.data && sideImage.data && bothReady) onNext(topImage.data, sideImage.data); }}
             disabled={!bothReady}
             className="btn-primary ripple group w-full flex items-center justify-center gap-2 text-lg"
           >

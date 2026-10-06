@@ -1,3 +1,4 @@
+import advisorShoe from '@/assets/advisor-shoe.jpg';
 import Button from '@/components/AdvisorButton';
 import { useEffect, useState } from 'react';
 import { Motion } from '@/components/Animation';
@@ -137,9 +138,9 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
 
       {/* Header */}
       <header className="sticky top-0 z-40 glass border-b border-border/60 dark:border-card/5">
-        <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+        <div className="home-nav">
           <Logo size="sm" />
-          <div className="flex items-center gap-2.5">
+          <div className="home-nav-links"><Button onClick={onGetStarted} className="nav-link">Find my fit</Button><Button onClick={onHowItWorks} className="nav-link">How it works</Button><InstallAppButton />
             <Button
               onClick={toggle}
               className="glass-card p-2.5  transition-transform duration-300"
@@ -187,62 +188,23 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="max-w-6xl mx-auto px-5 pt-12 pb-8 md:pt-20 md:pb-16">
-        <div className="grid md:grid-cols-2 gap-10 items-center">
-          <div className="flex flex-col gap-5">
-            <div className="inline-flex items-center gap-2 glass-card px-4 py-2 w-fit">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success" />
-              </span>
-              <span className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">AI Engine Online</span>
-            </div>
-
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight tracking-normal">
-              Smart Shoe <span className="gradient-text">Advisor</span>
-            </h1>
-
-            <p className="text-xl font-bold text-foreground dark:text-primary-foreground max-w-md leading-relaxed">
-              AI Powered Foot Analysis & Intelligent Shoe Recommendation
-            </p>
-
-            <p className="text-sm font-mono text-primary dark:text-primary tracking-normal uppercase">
-              Scan. Measure. Match. — Computer Vision in Your Browser.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Button onClick={onGetStarted} className="btn-primary ripple group w-fit flex items-center gap-2 text-lg">
-                Get Started
-                <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button onClick={onHowItWorks} className="btn-ghost group w-fit flex items-center gap-2 text-base">
-                <Brain size={20} className="text-primary group- transition-transform" />
-                How It Works
-              </Button>
-              <InstallAppButton />
-            </div>
-          </div>
-
-          {/* Hero sneaker */}
-          <Motion className="relative flex items-center justify-center">
-
-            <div className="absolute h-60 w-60 md:h-80 md:w-80 rounded-full border-2 border-primary/20 animate-spin-slow" />
-            <img
-              src="https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Premium sneaker"
-              className="relative z-10 max-w-full h-auto  drop-shadow-2xl rounded-lg"
-            />
-            <div className="absolute top-8 right-4 glass-card px-3 py-2 rounded-lg ">
-              <span className="text-xs font-semibold text-primary dark:text-primary">AI Scanned ✓</span>
-            </div>
-          </Motion>
-        </div>
+      <section className="home-hero">
+        <img src={advisorShoe} alt="White technical running shoe with green accents" width={1600} height={1024} className="home-hero-image" />
+        <div className="home-hero-inner"><div className="home-hero-copy">
+          <span className="eyebrow"><Sparkles size={14} /> YOUR PERSONAL AI SHOE ADVISOR</span>
+          <h1>Smart Shoe<br /><span>Advisor.</span></h1>
+          <p>A better fit starts with you. Discover shoes matched to your feet, your movement, and your everyday life.</p>
+          <div className="hero-actions"><Button onClick={onGetStarted} className="btn-primary">Find my fit <ArrowRight size={18} /></Button><Button onClick={onHowItWorks} className="btn-ghost">How it works <Brain size={17} /></Button></div>
+          <div className="hero-detail"><span><Ruler size={15} /> UK · US · EU · India</span><span><Footprints size={15} /> Made for your feet</span></div>
+        </div></div>
       </section>
+      <div className="journey-strip">
+        {[['01', 'Capture your feet', 'Two photos. One clear picture.'], ['02', 'Measure & understand', 'Your dimensions, arch, and activity.'], ['03', 'Meet your match', 'Personalized shoes. Confident steps.']].map(([n,title,desc]) => <div className="journey-item" key={n}><span>{n}</span><div><h3>{title}</h3><p>{desc}</p></div></div>)}
+      </div>
 
       {/* Analysis history */}
-      <section className="max-w-6xl mx-auto px-5 py-6">
-        <div className="flex items-center gap-2.5 mb-5">
+      <section className="home-section">
+        <div className="flex flex-wrap items-center gap-2.5 mb-5">
           <History size={20} className="text-primary dark:text-primary" />
           <h2 className="text-xl font-bold">Your Analysis History</h2>
           {history.length > 0 && (
@@ -298,19 +260,7 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
             ))}
           </div>
         ) : history.length === 0 ? (
-          <div className="glass-card p-8 text-center">
-            <div className="h-14 w-14 rounded-lg bg-primary flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
-              <Footprints size={26} className="text-primary-foreground" />
-            </div>
-            <h3 className="font-semibold text-lg mb-1">No analyses yet</h3>
-            <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-5 max-w-sm mx-auto">
-              Run your first foot analysis and it will be saved here for you to revisit anytime.
-            </p>
-            <Button onClick={onGetStarted} className="btn-primary ripple group inline-flex items-center gap-2">
-              Start Your First Analysis
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </div>
+          <div className="empty-history"><div className="empty-icon"><Footprints size={26} /></div><div className="min-w-0"><h3 className="font-semibold mb-1">Your next great fit starts here</h3><p className="text-sm text-muted-foreground">Your saved analyses will appear here after your first scan.</p></div><Button onClick={onGetStarted} className="btn-ghost">Start an analysis <ArrowRight size={16} /></Button></div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {history.map((item, i) => {
@@ -335,7 +285,7 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
                   {!compareMode && (
                     <Button
                       onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                      className="absolute top-2 left-2 glass-card p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity "
+                      className="absolute top-2 left-2 glass-card p-1.5 rounded-lg opacity-100 transition-opacity "
                       aria-label="Delete analysis"
                     >
                       <Trash2 size={14} className="text-destructive" />
@@ -360,16 +310,16 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
       </section>
 
       {/* Feature cards */}
-      <section className="max-w-6xl mx-auto px-5 py-10">
+      <section className="home-section">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {features.map((f, i) => (
             <Motion
               key={f.title}
               transition={{ delay: i * 0.1 }}
-              className="glass-card p-6 group hover:-translate-y-1.5 transition-all duration-300 cursor-default"
+              className="feature-item"
             >
               <div className={`h-14 w-14 rounded-lg bg-gradient-to-br from-primary to-primary flex items-center justify-center mb-4 shadow-lg group- transition-transform duration-300`}>
-                <f.icon size={26} className="text-primary-foreground" />
+                <f.icon size={22} />
               </div>
               <h3 className="font-semibold text-base mb-1.5 leading-snug">{f.title}</h3>
               <p className="text-sm text-muted-foreground dark:text-muted-foreground leading-relaxed">{f.desc}</p>
@@ -379,8 +329,8 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
       </section>
 
       {/* Community Rating & Rate the App */}
-      <section className="max-w-6xl mx-auto px-5 py-10">
-        <div className="glass-card p-8 md:p-12 relative overflow-hidden">
+      <section className="home-section">
+        <div className="community-section">
 
           <div className="relative z-10 text-center">
             <div className="inline-flex items-center gap-2 glass-card px-4 py-2 mb-4">
@@ -417,7 +367,7 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
 
       {/* CTA */}
       <section className="max-w-6xl mx-auto px-5 py-12 pb-20">
-        <Motion className="glass-card p-10 md:p-16 text-center relative overflow-hidden">
+        <Motion className="text-center py-8">
 
 
           <div className="relative z-10">

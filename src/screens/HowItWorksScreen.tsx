@@ -1,3 +1,5 @@
+import AdvisorHeader from '@/components/AdvisorHeader';
+import AdvisorProgress from '@/components/AdvisorProgress';
 import Button from '@/components/AdvisorButton';
 import { ArrowLeft, Scan, Brain, Ruler, Footprints, Sparkles, Cpu, Image as ImageIcon, Layers, Zap, Check, BarChart3 } from 'lucide-react';
 import Logo from '@/components/Logo';
@@ -65,15 +67,7 @@ export default function HowItWorksScreen({ onBack, onHome }: HowItWorksScreenPro
     <div className="min-h-screen relative overflow-hidden">
 
 
-      <header className="sticky top-0 z-40 glass border-b border-border/60 dark:border-card/5">
-        <div className="max-w-4xl mx-auto px-5 py-4 flex items-center justify-between">
-          <Button onClick={onBack} className="glass-card p-2.5  transition-transform">
-            <ArrowLeft size={20} className="text-primary dark:text-primary" />
-          </Button>
-          <Logo size="sm" />
-          <HomeButton onClick={onHome} />
-        </div>
-      </header>
+      <AdvisorHeader onBack={onBack} onHome={onHome} />
 
       <div className="max-w-4xl mx-auto px-5 py-8">
         <div className="text-center mb-10">

@@ -44,11 +44,11 @@ export default function InstallAppButton() {
     <>
       <Button
         onClick={handleClick}
-        className="btn-ghost group w-fit flex items-center gap-2 text-base"
+        className="btn-ghost group w-fit flex items-center gap-2 text-xs"
         aria-label="Download the Smart Shoe Advisor app"
       >
         <Download size={20} className="text-primary group-hover:translate-y-0.5 transition-transform" />
-        Download App
+        <span className="hidden sm:inline">Download App</span>
       </Button>
 
       {showHelp && (

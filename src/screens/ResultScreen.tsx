@@ -1,3 +1,5 @@
+import AdvisorHeader from '@/components/AdvisorHeader';
+import AdvisorProgress from '@/components/AdvisorProgress';
 import Button from '@/components/AdvisorButton';
 import { useRef, useState, useEffect } from 'react';
 import { ArrowLeft, Download, RefreshCw, Share2, Ruler, Footprints, Activity as ActivityIcon, Sparkles, Star, Shield, Wrench, Check, TrendingUp, TrendingDown, RotateCw, RotateCcw, Send, X, Heart, AlertTriangle, type LucideIcon } from 'lucide-react';
@@ -132,17 +134,9 @@ export default function ResultScreen({ result, analysisId, onBack, onHome, onAna
     <div className="min-h-screen relative overflow-hidden">
 
 
-      <header className="sticky top-0 z-40 glass border-b border-border/60 dark:border-card/5">
-        <div className="max-w-4xl mx-auto px-5 py-4 flex items-center justify-between">
-          <Button onClick={onBack} className="glass-card p-2.5  transition-transform">
-            <ArrowLeft size={20} className="text-primary dark:text-primary" />
-          </Button>
-          <Logo size="sm" />
-          <HomeButton onClick={onHome} />
-        </div>
-      </header>
+      <AdvisorHeader onBack={onBack} onHome={onHome} />
 
-      <div ref={reportRef} className="max-w-4xl mx-auto px-5 py-8">
+      <div ref={reportRef} className="result-shell mx-auto px-5 py-8">
         {/* Progress */}
         <div className="flex items-center gap-2 mb-8">
           {['Upload', 'Activity', 'Analysis', 'Result'].map((step, i) => (
@@ -153,42 +147,14 @@ export default function ResultScreen({ result, analysisId, onBack, onHome, onAna
           ))}
         </div>
 
-        {/* Hero result */}
-        <div className="glass-card p-6 md:p-8 mb-6 relative overflow-hidden">
-
-          <div className="relative z-10 flex flex-col md:flex-row gap-6 items-center">
-            <div className="relative flex-shrink-0">
-
-              <img src={result.image} alt={result.recommended_shoe} className="relative h-44 w-44 md:h-52 md:w-52 object-cover rounded-lg shadow-xl " />
-            </div>
-            <div className="flex-1 text-center md:text-left">
-              <div className="inline-flex items-center gap-2 glass-card px-3 py-1.5 mb-3">
-                <Sparkles size={14} className="text-primary" />
-                <span className="text-xs font-semibold text-primary dark:text-primary">AI Recommended</span>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-1">{result.recommended_shoe}</h2>
-              <p className="text-muted-foreground dark:text-muted-foreground mb-3">by {result.brand}</p>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                <div className="flex items-center gap-1.5 glass-card px-3 py-1.5 rounded-md">
-                  <div className="h-2 w-2 rounded-full bg-success" />
-                  <span className="text-sm font-semibold text-success dark:text-success">{result.confidence}% Confidence</span>
-                </div>
-                <span className="text-sm text-muted-foreground">·</span>
-                <span className="text-sm font-medium">{result.priceRange}</span>
-              </div>
-              {result.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-3 justify-center md:justify-start">
-                  {result.tags.map((tag) => (
-                    <span key={tag} className="glass px-2.5 py-1 rounded-lg text-xs font-medium">{tag}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <div className="page-heading"><span className="eyebrow"><Check size={14} /> ANALYSIS COMPLETE</span><h1>Your next step, matched.</h1><p>A personalized recommendation for the way you move.</p></div>
+        <section className="result-hero"><div className="result-hero-inner">
+          <img src={result.image} alt={result.recommended_shoe} className="result-product-photo" />
+          <div className="result-product-copy"><span className="match-badge"><Sparkles size={14} /> Your top recommendation</span><h2>{result.recommended_shoe}</h2><p className="text-muted-foreground">{result.brand} · {activity?.label ?? result.activity_label}</p><p className="result-price">{result.priceRange}</p><span className="match-badge"><Check size={14} /> {result.confidence}% Confidence</span><div className="flex flex-wrap gap-2 mt-5">{result.tags.map(tag => <span key={tag} className="bg-muted px-3 py-1 rounded text-xs">{tag}</span>)}</div></div>
+        </div></section>
 
         {/* Foot Type Classification */}
-        <div className="glass-card p-5 mb-6 relative overflow-hidden">
+        <div className="result-section relative">
           <div className={`absolute top-0 right-0 h-32 w-32 rounded-full bg-gradient-to-br from-primary to-primary opacity-10 blur-3xl`} />
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-4">
@@ -250,7 +216,7 @@ export default function ResultScreen({ result, analysisId, onBack, onHome, onAna
         </div>
 
         {/* Reason */}
-        <div className="glass-card p-5 mb-6">
+        <div className="result-section">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles size={18} className="text-primary" />
             <h3 className="font-semibold">Why this shoe?</h3>
@@ -282,43 +248,11 @@ export default function ResultScreen({ result, analysisId, onBack, onHome, onAna
             </h3>
             <div className="grid sm:grid-cols-2 gap-4">
               {result.alternatives.map((alt, i) => (
-                <Button
-                  key={alt.shoeName}
-                  onClick={() => setSelectedAlt(selectedAlt === i ? null : i)}
-                  className={`glass-card p-4 text-left transition-all duration-300 hover:-translate-y-1
-                    ${selectedAlt === i ? 'ring-2 ring-primary shadow-lg shadow-primary/20' : ''}`}
-                >
-                  <div className="flex gap-4">
-                    <img src={alt.image} alt={alt.shoeName} className="h-20 w-20 rounded-lg object-cover flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold truncate">{alt.shoeName}</h4>
-                      <p className="text-xs text-muted-foreground mb-1">{alt.brand} · {alt.priceRange}</p>
-                      <div className="flex flex-wrap gap-1">
-                        {alt.tags.map((t) => (
-                          <span key={t} className="glass px-2 py-0.5 rounded-md text-[10px] font-medium">{t}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  {selectedAlt === i && (
-                    <div className="mt-3 animate-fade-in">
-                      <p className="text-sm text-muted-foreground dark:text-muted-foreground leading-relaxed mb-3">{alt.reason}</p>
-                      <div className="grid grid-cols-3 gap-2 text-center">
-                        <div className="glass p-2 rounded-md">
-                          <p className="text-[10px] text-muted-foreground">Comfort</p>
-                          <p className="text-sm font-bold gradient-text">{alt.comfort}</p>
-                        </div>
-                        <div className="glass p-2 rounded-md">
-                          <p className="text-[10px] text-muted-foreground">Support</p>
-                          <p className="text-sm font-bold gradient-text">{alt.support}</p>
-                        </div>
-                        <div className="glass p-2 rounded-md">
-                          <p className="text-[10px] text-muted-foreground">Durability</p>
-                          <p className="text-sm font-bold gradient-text">{alt.durability}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                <Button key={alt.shoeName} onClick={() => setSelectedAlt(selectedAlt === i ? null : i)} className="alternative-card" aria-expanded={selectedAlt === i}>
+                  <img src={alt.image} alt={alt.shoeName} className="alternative-image" loading="lazy" />
+                  <div className="alternative-content"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-xs text-muted-foreground mb-2">{alt.brand}</p><h4 className="font-semibold text-lg">{alt.shoeName}</h4></div><span className="text-primary shrink-0 text-xl">{selectedAlt === i ? '−' : '+'}</span></div><p className="font-semibold mt-2">{alt.priceRange}</p><div className="flex flex-wrap gap-1 mt-3">{alt.tags.map(t => <span key={t} className="bg-muted px-2 py-1 rounded text-xs">{t}</span>)}</div>
+                  <div className="alternative-scores"><div><span>Comfort</span><strong>{alt.comfort}/10</strong></div><div><span>Support</span><strong>{alt.support}/10</strong></div><div><span>Durability</span><strong>{alt.durability}/10</strong></div></div>
+                  {selectedAlt === i && <p className="text-sm text-muted-foreground leading-relaxed mt-4 animate-fade-in">{alt.reason}</p>}</div>
                 </Button>
               ))}
             </div>
@@ -326,7 +260,7 @@ export default function ResultScreen({ result, analysisId, onBack, onHome, onAna
       )}
 
       {/* Foot health tips & wrong-shoe hazards */}
-      <div className="grid md:grid-cols-2 gap-5 mb-8">
+      <div className="health-band grid md:grid-cols-2 gap-8 mb-8">
         <div className="glass-card p-5 md:p-6 relative overflow-hidden">
 
           <div className="relative z-10">

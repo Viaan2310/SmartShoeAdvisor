@@ -19,12 +19,12 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
   }, [onDone]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-primary via-primary to-primary dark:from-primary dark:via-primary dark:to-primary overflow-hidden transition-colors duration-500">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background overflow-hidden">
       {/* Animated background orbs */}
 
 
       <div className="relative z-10 flex flex-col items-center gap-8 animate-bounce-in">
-        <div className="scale-150 mb-8">
+        <div className="mb-8">
           <Logo size="md" />
         </div>
 
