@@ -8,3 +8,8 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## UI architecture
+- Keep the existing screen state machine and analysis modules unchanged during presentation work, so recommendation behavior remains stable.
+- Use AdvisorButton as the shared shadcn-backed screen control and AdvisorHeader/AdvisorProgress for consistent navigation and flow state.
+- Define visual roles in src/styles.css with semantic OKLCH tokens; UI modules must reference those roles rather than palette literals.
