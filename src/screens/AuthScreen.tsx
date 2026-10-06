@@ -1,3 +1,4 @@
+import Button from '@/components/AdvisorButton';
 import { useState, type FormEvent } from 'react';
 import { Mail, Lock, ArrowRight, Footprints, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import Logo from '@/components/Logo';
@@ -56,9 +57,8 @@ export default function AuthScreen() {
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center px-5 py-10">
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-blue-400/15 blur-3xl -z-10" />
-      <div className="absolute bottom-0 left-0 h-96 w-96 rounded-full bg-cyan-400/15 blur-3xl -z-10" />
-      <div className="absolute top-1/3 left-1/4 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl -z-10 animate-float" />
+
+
 
       <div className="w-full max-w-md">
         {/* Logo / heading */}
@@ -69,7 +69,7 @@ export default function AuthScreen() {
           <h1 className="text-2xl md:text-3xl font-bold text-center">
             {mode === 'signin' ? 'Welcome back' : 'Create your account'}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 text-center">
+          <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-1.5 text-center">
             {mode === 'signin'
               ? 'Sign in to access your saved analyses'
               : 'Join Smart Shoe Advisor to save your foot analyses'}
@@ -78,87 +78,87 @@ export default function AuthScreen() {
 
         {/* Mode toggle */}
         <div className="glass-card p-1.5 flex gap-1 mb-6">
-          <button
+          <Button
             onClick={() => switchMode('signin')}
-            className={`flex-1 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-300
-              ${mode === 'signin' ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300
+              ${mode === 'signin' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30' : 'text-muted-foreground dark:text-muted-foreground hover:text-muted-foreground dark:hover:text-muted-foreground'}`}
           >
             Sign In
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => switchMode('signup')}
-            className={`flex-1 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-300
-              ${mode === 'signup' ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300
+              ${mode === 'signup' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30' : 'text-muted-foreground dark:text-muted-foreground hover:text-muted-foreground dark:hover:text-muted-foreground'}`}
           >
             Sign Up
-          </button>
+          </Button>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="glass-card p-6 md:p-7 space-y-5">
           {/* Email */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 block">
+            <label className="text-xs font-semibold text-muted-foreground dark:text-muted-foreground uppercase tracking-normal mb-2 block">
               Email
             </label>
             <div className="relative">
-              <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
+              <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 autoComplete="email"
-                className="w-full glass rounded-2xl pl-11 pr-4 py-3.5 text-sm font-medium outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-500/50"
+                className="w-full glass rounded-lg pl-11 pr-4 py-3.5 text-sm font-medium outline-none transition-all duration-300 focus:ring-2 focus:ring-primary/50"
               />
             </div>
           </div>
 
           {/* Password */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 block">
+            <label className="text-xs font-semibold text-muted-foreground dark:text-muted-foreground uppercase tracking-normal mb-2 block">
               Password
             </label>
             <div className="relative">
-              <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
+              <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'}
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                className="w-full glass rounded-2xl pl-11 pr-12 py-3.5 text-sm font-medium outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-500/50"
+                className="w-full glass rounded-lg pl-11 pr-12 py-3.5 text-sm font-medium outline-none transition-all duration-300 focus:ring-2 focus:ring-primary/50"
               />
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
                 tabIndex={-1}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2.5 glass-card p-3.5 border-l-4 border-red-500 animate-fade-in">
-              <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <div className="flex items-start gap-2.5 glass-card p-3.5 border-l-4 border-destructive animate-fade-in">
+              <AlertCircle size={18} className="text-destructive flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive dark:text-destructive">{error}</p>
             </div>
           )}
 
           {/* Info */}
           {info && (
-            <div className="flex items-start gap-2.5 glass-card p-3.5 border-l-4 border-green-500 animate-fade-in">
-              <CheckCircle2 size={18} className="text-green-500 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-green-600 dark:text-green-400">{info}</p>
+            <div className="flex items-start gap-2.5 glass-card p-3.5 border-l-4 border-success animate-fade-in">
+              <CheckCircle2 size={18} className="text-success flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-success dark:text-success">{info}</p>
             </div>
           )}
 
           {/* Submit */}
-          <button
+          <Button
             type="submit"
             disabled={submitting}
             className="btn-primary ripple group w-full flex items-center justify-center gap-2 text-lg"
@@ -174,23 +174,23 @@ export default function AuthScreen() {
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </>
             )}
-          </button>
+          </Button>
 
-          <p className="text-xs text-gray-400 text-center flex items-center justify-center gap-1.5">
-            <Footprints size={12} className="text-blue-400" />
+          <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
+            <Footprints size={12} className="text-primary" />
             Your analyses are saved privately to your account.
           </p>
         </form>
 
         {/* Switch link */}
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+        <p className="text-center text-sm text-muted-foreground dark:text-muted-foreground mt-6">
           {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-          <button
+          <Button
             onClick={() => switchMode(mode === 'signin' ? 'signup' : 'signin')}
-            className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+            className="font-semibold text-primary dark:text-primary hover:underline"
           >
             {mode === 'signin' ? 'Sign up' : 'Sign in'}
-          </button>
+          </Button>
         </p>
       </div>
     </div>

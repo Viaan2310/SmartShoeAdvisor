@@ -1,3 +1,4 @@
+import Button from '@/components/AdvisorButton';
 import HomeButton from '@/components/HomeButton';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Ruler, Move, Check, RotateCcw } from 'lucide-react';
@@ -34,19 +35,19 @@ const stepInfo: Record<LineId, { title: string; hint: string; color: string; rin
     title: 'Mark the 30 cm ruler',
     hint: 'Drag the two handles onto the 0 cm and 30 cm marks on your ruler.',
     color: '#22d3ee',
-    ring: 'ring-cyan-400',
+    ring: 'ring-primary',
   },
   length: {
     title: 'Mark your foot length',
     hint: 'Place one handle at the back of your heel and the other at the tip of your longest toe.',
     color: '#60a5fa',
-    ring: 'ring-blue-400',
+    ring: 'ring-primary',
   },
   width: {
     title: 'Mark your foot width',
     hint: 'Place the handles across the widest part of your foot (the ball).',
     color: '#f472b6',
-    ring: 'ring-pink-400',
+    ring: 'ring-measurement-width',
   },
 };
 
@@ -174,17 +175,17 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
   return (
     <div className="min-h-screen flex flex-col px-5 py-6 gap-5">
       <header className="flex items-center gap-3">
-        <button onClick={back} className="h-10 w-10 rounded-full glass-card flex items-center justify-center ripple" aria-label="Back">
+        <Button onClick={back} className="h-10 w-10 rounded-full glass-card flex items-center justify-center ripple" aria-label="Back">
           <ArrowLeft size={18} />
-        </button>
+        </Button>
         <div>
           <h1 className="text-lg font-bold">Calibrate measurements</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Step {stepIdx + 1} of {steps.length}</p>
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground">Step {stepIdx + 1} of {steps.length}</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <button onClick={reset} className="h-10 w-10 rounded-full glass-card flex items-center justify-center ripple" aria-label="Reset line">
+          <Button onClick={reset} className="h-10 w-10 rounded-full glass-card flex items-center justify-center ripple" aria-label="Reset line">
             <RotateCcw size={16} />
-          </button>
+          </Button>
           <HomeButton onClick={onHome} className="!rounded-full h-10 w-10 justify-center !p-0" />
         </div>
       </header>
@@ -195,17 +196,17 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
           const active = i === stepIdx;
           const done = i < stepIdx;
           return (
-            <button
+            <Button
               key={s}
               onClick={() => setStepIdx(i)}
-              className={`flex-1 rounded-2xl px-3 py-2 text-xs font-semibold transition-all
-                ${active ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg' : done ? 'glass-card' : 'glass-card opacity-60'}`}
+              className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all
+                ${active ? 'bg-primary text-primary-foreground shadow-lg' : done ? 'glass-card' : 'glass-card opacity-60'}`}
             >
               <div className="flex items-center justify-center gap-1.5">
                 {done ? <Check size={14} /> : s === 'ruler' ? <Ruler size={14} /> : <Move size={14} />}
                 <span className="capitalize">{s}</span>
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -215,14 +216,14 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
         ref={containerRef}
         onPointerDown={onContainerPointerDown}
         onPointerMove={onPointerMove}
-        className="relative w-full mx-auto max-w-md aspect-[3/4] rounded-3xl overflow-hidden glass-card touch-none select-none"
+        className="relative w-full mx-auto max-w-md aspect-[3/4] rounded-lg overflow-hidden glass-card touch-none select-none"
         style={{ touchAction: 'none' }}
       >
         <img
           src={topImage}
           alt="Top view of foot"
           onLoad={onImgLoad}
-          className="absolute inset-0 w-full h-full object-contain bg-gray-900"
+          className="absolute inset-0 w-full h-full object-contain bg-foreground"
           draggable={false}
         />
 
@@ -265,7 +266,7 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
           return (
             <div
               key={`${id}-badge`}
-              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-black/70 backdrop-blur-sm border whitespace-nowrap"
+              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-overlay/70 backdrop-blur-sm border whitespace-nowrap"
               style={{
                 left: `${mx}%`,
                 top: `${my}%`,
@@ -289,7 +290,7 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
           return (['a', 'b'] as const).map((end) => {
             const p = l[end];
             return (
-              <button
+              <Button
                 key={`${id}-${end}`}
                 onPointerDown={startDrag(id, end)}
                 aria-label={`${id} ${end === 'a' ? 'start' : 'end'} handle`}
@@ -304,10 +305,10 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
                   touchAction: 'none',
                 }}
               >
-                <span className="absolute inset-1.5 rounded-full bg-white/95 dark:bg-gray-900/95 flex items-center justify-center text-[10px] font-bold" style={{ color: c }}>
+                <span className="absolute inset-1.5 rounded-full bg-card/95 dark:bg-foreground/95 flex items-center justify-center text-[10px] font-bold" style={{ color: c }}>
                   {end === 'a' ? '1' : '2'}
                 </span>
-              </button>
+              </Button>
             );
           });
         })}
@@ -315,35 +316,35 @@ export default function CalibrationScreen({ topImage, onBack, onHome, onNext }: 
         {/* Live readout */}
         {geom && (
           <div className="absolute top-3 left-3 right-3 flex justify-between gap-2 text-[10px] font-mono pointer-events-none">
-            <div className="bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg">
-              <span className="text-gray-400">Scale:</span>{' '}
-              <span className="text-cyan-300 font-semibold">{geom.pixelsPerCm.toFixed(1)} px/cm</span>
+            <div className="bg-overlay/60 backdrop-blur-sm px-2 py-1 rounded-lg">
+              <span className="text-muted-foreground">Scale:</span>{' '}
+              <span className="text-primary font-semibold">{geom.pixelsPerCm.toFixed(1)} px/cm</span>
             </div>
-            <div className="bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg">
-              <span className="text-gray-400">L:</span>{' '}
-              <span className="text-blue-300 font-semibold">{geom.lengthCm.toFixed(1)} cm</span>
-              <span className="text-gray-400 ml-2">W:</span>{' '}
-              <span className="text-pink-300 font-semibold">{geom.widthCm.toFixed(1)} cm</span>
+            <div className="bg-overlay/60 backdrop-blur-sm px-2 py-1 rounded-lg">
+              <span className="text-muted-foreground">L:</span>{' '}
+              <span className="text-primary font-semibold">{geom.lengthCm.toFixed(1)} cm</span>
+              <span className="text-muted-foreground ml-2">W:</span>{' '}
+              <span className="text-measurement-width font-semibold">{geom.widthCm.toFixed(1)} cm</span>
             </div>
           </div>
         )}
       </div>
 
       {/* Instructions */}
-      <div className="glass-card p-4 rounded-2xl">
+      <div className="glass-card p-4 rounded-lg">
         <div className="flex items-center gap-2 mb-1">
           <span className="h-2 w-2 rounded-full" style={{ background: info.color }} />
           <h2 className="text-sm font-bold">{info.title}</h2>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{info.hint}</p>
+        <p className="text-xs text-muted-foreground dark:text-muted-foreground">{info.hint}</p>
       </div>
 
       {/* Actions */}
       <div className="mt-auto flex gap-3">
-        <button onClick={back} className="flex-1 btn-secondary ripple">Back</button>
-        <button onClick={next} className="flex-[1.5] btn-primary ripple" disabled={!geom || geom.pixelsPerCm <= 0}>
+        <Button onClick={back} className="flex-1 btn-secondary ripple">Back</Button>
+        <Button onClick={next} className="flex-[1.5] btn-primary ripple" disabled={!geom || geom.pixelsPerCm <= 0}>
           {stepIdx < steps.length - 1 ? 'Next' : 'Confirm & Analyze'}
-        </button>
+        </Button>
       </div>
     </div>
   );

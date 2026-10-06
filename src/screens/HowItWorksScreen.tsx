@@ -1,3 +1,4 @@
+import Button from '@/components/AdvisorButton';
 import { ArrowLeft, Scan, Brain, Ruler, Footprints, Sparkles, Cpu, Image as ImageIcon, Layers, Zap, Check, BarChart3 } from 'lucide-react';
 import Logo from '@/components/Logo';
 import HomeButton from '@/components/HomeButton';
@@ -62,14 +63,13 @@ const techStack = [
 export default function HowItWorksScreen({ onBack, onHome }: HowItWorksScreenProps) {
   return (
     <div className="min-h-screen relative overflow-hidden">
-      <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-blue-400/10 blur-3xl -z-10" />
-      <div className="absolute bottom-1/4 left-0 h-80 w-80 rounded-full bg-cyan-400/10 blur-3xl -z-10" />
 
-      <header className="sticky top-0 z-40 glass border-b border-gray-200/60 dark:border-white/5">
+
+      <header className="sticky top-0 z-40 glass border-b border-border/60 dark:border-card/5">
         <div className="max-w-4xl mx-auto px-5 py-4 flex items-center justify-between">
-          <button onClick={onBack} className="glass-card p-2.5 hover:scale-110 transition-transform">
-            <ArrowLeft size={20} className="text-blue-600 dark:text-blue-400" />
-          </button>
+          <Button onClick={onBack} className="glass-card p-2.5  transition-transform">
+            <ArrowLeft size={20} className="text-primary dark:text-primary" />
+          </Button>
           <Logo size="sm" />
           <HomeButton onClick={onHome} />
         </div>
@@ -78,11 +78,11 @@ export default function HowItWorksScreen({ onBack, onHome }: HowItWorksScreenPro
       <div className="max-w-4xl mx-auto px-5 py-8">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 glass-card px-4 py-2 mb-4">
-            <Brain size={16} className="text-blue-500" />
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Under the Hood</span>
+            <Brain size={16} className="text-primary" />
+            <span className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">Under the Hood</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-3">How <span className="gradient-text">Smart Shoe Advisor</span> Works</h1>
-          <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+          <p className="text-muted-foreground dark:text-muted-foreground max-w-xl mx-auto">
             Seven computer-vision stages transform a simple photo into a precise foot measurement and personalized shoe recommendation — all in your browser.
           </p>
         </div>
@@ -90,7 +90,7 @@ export default function HowItWorksScreen({ onBack, onHome }: HowItWorksScreenPro
         {/* Pipeline */}
         <div className="relative">
           {/* Vertical line */}
-          <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-blue-500/40 via-cyan-500/30 to-transparent" />
+          <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-primary/40 via-primary/30 to-transparent" />
 
           <div className="space-y-5">
             {pipeline.map((step, i) => {
@@ -102,10 +102,10 @@ export default function HowItWorksScreen({ onBack, onHome }: HowItWorksScreenPro
                 >
                   {/* Node */}
                   <div className="relative z-10 flex-shrink-0">
-                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                      <Icon size={22} className="text-white" />
+                    <div className="h-12 w-12 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
+                      <Icon size={22} className="text-primary-foreground" />
                     </div>
-                    <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full glass-card flex items-center justify-center text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                    <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full glass-card flex items-center justify-center text-[10px] font-bold text-primary dark:text-primary">
                       {i + 1}
                     </div>
                   </div>
@@ -114,11 +114,11 @@ export default function HowItWorksScreen({ onBack, onHome }: HowItWorksScreenPro
                   <div className="glass-card p-5 flex-1 group hover:-translate-y-0.5 transition-all duration-300">
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <h3 className="font-semibold text-base">{step.title}</h3>
-                      <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 glass px-2 py-1 rounded-lg whitespace-nowrap">
+                      <span className="text-[10px] font-mono text-primary dark:text-primary glass px-2 py-1 rounded-lg whitespace-nowrap">
                         {step.tech}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{step.desc}</p>
+                    <p className="text-sm text-muted-foreground dark:text-muted-foreground leading-relaxed">{step.desc}</p>
                   </div>
                 </div>
               );
@@ -137,12 +137,12 @@ export default function HowItWorksScreen({ onBack, onHome }: HowItWorksScreenPro
                   key={t.label}
                   className="glass-card p-5 flex items-center gap-4"
                 >
-                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-lg flex-shrink-0">
-                    <Icon size={24} className="text-white" />
+                  <div className="h-12 w-12 rounded-lg bg-primary flex items-center justify-center shadow-lg flex-shrink-0">
+                    <Icon size={24} className="text-primary-foreground" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">{t.label}</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.desc}</p>
+                    <p className="text-xs text-muted-foreground dark:text-muted-foreground">{t.desc}</p>
                   </div>
                 </div>
               );
@@ -163,20 +163,20 @@ export default function HowItWorksScreen({ onBack, onHome }: HowItWorksScreenPro
               'Multi-standard size output (UK/US/EU)',
             ].map((point) => (
               <div key={point} className="flex items-center gap-2.5">
-                <div className="h-5 w-5 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                  <Check size={12} className="text-green-600 dark:text-green-400" />
+                <div className="h-5 w-5 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
+                  <Check size={12} className="text-success dark:text-success" />
                 </div>
-                <span className="text-sm text-gray-600 dark:text-gray-300">{point}</span>
+                <span className="text-sm text-muted-foreground dark:text-muted-foreground">{point}</span>
               </div>
             ))}
           </div>
         </div>
 
         <div className="mt-8 text-center">
-          <button onClick={onBack} className="btn-primary ripple group inline-flex items-center gap-2">
+          <Button onClick={onBack} className="btn-primary ripple group inline-flex items-center gap-2">
             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
             Back to Home
-          </button>
+          </Button>
         </div>
       </div>
     </div>
