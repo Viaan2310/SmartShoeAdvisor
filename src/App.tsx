@@ -90,7 +90,7 @@ function AppInner() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <div className="scale-150"><Logo size="md" /></div>
-        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+        <div className="flex items-center gap-2 text-primary dark:text-primary">
           <Loader2 size={20} className="animate-spin" />
           <span className="text-sm font-medium">Loading...</span>
         </div>

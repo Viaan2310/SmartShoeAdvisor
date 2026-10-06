@@ -198,16 +198,16 @@ export default function FootDiagram({ footLengthCm, footWidthCm, footType }: Foo
   return (
     <div className="glass-card p-4">
       <div className="flex items-center gap-2 mb-3">
-        <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-          <span className="text-white text-xs font-bold">CV</span>
+        <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
+          <span className="text-primary-foreground text-xs font-bold">CV</span>
         </div>
         <div>
           <h3 className="font-semibold text-sm">Visual Measurement Map</h3>
-          <p className="text-[10px] text-gray-400">Computer-vision detected dimensions</p>
+          <p className="text-[10px] text-muted-foreground">Computer-vision detected dimensions</p>
         </div>
         <div className="ml-auto flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[10px] font-mono text-green-600 dark:text-green-400">LIVE</span>
+          <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+          <span className="text-[10px] font-mono text-success dark:text-success">LIVE</span>
         </div>
       </div>
       <canvas ref={canvasRef} className="w-full h-72" />
