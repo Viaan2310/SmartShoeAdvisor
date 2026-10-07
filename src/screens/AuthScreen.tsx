@@ -56,15 +56,13 @@ export default function AuthScreen() {
   };
 
   return (
-    <main className="auth-shell">
+    <main className="auth-shell screen-enter">
+      <header className="auth-brand-header"><Logo /></header>
       <section className="auth-editorial">
-        <Logo />
-        <div><span className="eyebrow">A BETTER FIT. A BETTER STEP.</span><h2>Good shoes.<br />Great possibilities.</h2></div>
         <img src={advisorShoe} alt="White and green technical running sneaker" width={1600} height={1024} />
-        <div><p>Personalized shoe recommendations, grounded in your unique feet.</p><p className="mt-4 text-xs">SCAN. MEASURE. MATCH.</p></div>
+        <div className="auth-exhibition-title"><span className="eyebrow">A BETTER FIT. A BETTER STEP.</span><h2><em>Good shoes.</em><br /><span>Great possibilities.</span></h2></div>
       </section>
       <section className="auth-form-side"><div className="auth-form-inner">
-        <span className="eyebrow"><Footprints size={14} /> YOUR FIT JOURNEY</span>
         <h1>{mode === 'signin' ? 'Welcome back.' : 'Take your first step.'}</h1>
         <p className="text-sm text-muted-foreground">{mode === 'signin' ? 'Sign in to find your fit and revisit your analyses.' : 'Create an account for your personalized shoe journey.'}</p>
         <div className="auth-mode" aria-label="Account access">
@@ -81,6 +79,7 @@ export default function AuthScreen() {
         </form>
         <p className="auth-footer">{mode === 'signin' ? "New to FootFit AI? " : 'Already have an account? '}<Button onClick={() => switchMode(mode === 'signin' ? 'signup' : 'signin')} className="text-primary">{mode === 'signin' ? 'Create an account' : 'Sign in'}</Button></p>
       </div></section>
+      <footer className="auth-editorial-footer"><p>Personalized shoe recommendations, grounded in your unique feet.</p><span>SCAN. MEASURE. MATCH.</span></footer>
     </main>
   );
 }
