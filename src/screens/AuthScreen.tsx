@@ -79,7 +79,7 @@ export default function AuthScreen() {
           <Button type="submit" disabled={submitting} className="btn-primary w-full">{submitting ? <Loader2 size={18} className="animate-spin" /> : null}{submitting ? mode === 'signin' ? 'Signing in...' : 'Creating account...' : mode === 'signin' ? 'Sign In' : 'Create Account'}{!submitting && <ArrowRight size={18} />}</Button>
           <p className="auth-note flex items-center justify-center gap-2"><Lock size={12} /> Your analyses are saved privately to your account.</p>
         </form>
-        <p className="auth-footer">{mode === 'signin' ? "New to Smart Shoe Advisor? " : 'Already have an account? '}<Button onClick={() => switchMode(mode === 'signin' ? 'signup' : 'signin')} className="text-primary">{mode === 'signin' ? 'Create an account' : 'Sign in'}</Button></p>
+        <p className="auth-footer">{mode === 'signin' ? "New to FootFit AI? " : 'Already have an account? '}<Button onClick={() => switchMode(mode === 'signin' ? 'signup' : 'signin')} className="text-primary">{mode === 'signin' ? 'Create an account' : 'Sign in'}</Button></p>
       </div></section>
     </main>
   );

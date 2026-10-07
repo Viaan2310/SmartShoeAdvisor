@@ -29,7 +29,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
         </div>
 
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-foreground dark:text-primary-foreground tracking-normal">Smart Shoe Advisor</h1>
+          <h1 className="text-4xl font-bold text-foreground dark:text-primary-foreground tracking-normal">FootFit AI</h1>
           <p className="mt-2 text-primary dark:text-primary font-medium">AI Powered Foot Analysis</p>
           <p className="mt-1 text-sm font-mono text-primary dark:text-primary/90 tracking-normalr uppercase">Scan. Measure. Match.</p>
         </div>

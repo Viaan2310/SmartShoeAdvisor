@@ -192,7 +192,7 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
         <img src={advisorShoe} alt="White technical running shoe with green accents" width={1600} height={1024} className="home-hero-image" />
         <div className="home-hero-inner"><div className="home-hero-copy">
           <span className="eyebrow"><Sparkles size={14} /> YOUR PERSONAL AI SHOE ADVISOR</span>
-          <h1>Smart Shoe<br /><span>Advisor.</span></h1>
+          <h1>FootFit <span>AI</span></h1>
           <p>A better fit starts with you. Discover shoes matched to your feet, your movement, and your everyday life.</p>
           <div className="hero-actions"><Button onClick={onGetStarted} className="btn-primary">Find my fit <ArrowRight size={18} /></Button><Button onClick={onHowItWorks} className="btn-ghost">How it works <Brain size={17} /></Button></div>
           <div className="hero-detail"><span><Ruler size={15} /> UK · US · EU · India</span><span><Footprints size={15} /> Made for your feet</span></div>
@@ -352,14 +352,14 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
                 <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-1">Based on {ratingStats.count} {ratingStats.count === 1 ? 'rating' : 'ratings'}</p>
               </>
             ) : (
-              <p className="text-muted-foreground dark:text-muted-foreground">No ratings yet — be the first to rate Smart Shoe Advisor!</p>
+              <p className="text-muted-foreground dark:text-muted-foreground">No ratings yet — be the first to rate FootFit AI!</p>
             )}
             <Button
               onClick={() => { setShowAppRatingModal(true); setRatingSubmitted(false); }}
               className="mt-6 btn-primary ripple group inline-flex items-center gap-2"
             >
               <Star size={18} className="group- transition-transform" />
-              {userRating ? 'Update Your Rating' : 'Rate Smart Shoe Advisor'}
+              {userRating ? 'Update Your Rating' : 'Rate FootFit AI'}
             </Button>
           </div>
         </div>
@@ -386,7 +386,7 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
       {/* Footer */}
       <footer className="border-t border-border dark:border-card/5 py-6">
         <div className="max-w-6xl mx-auto px-5 text-center">
-          <p className="text-sm text-muted-foreground">Smart Shoe Advisor. Built for innovation.</p>
+          <p className="text-sm text-muted-foreground">FootFit AI. Built for innovation.</p>
         </div>
       </footer>
 
@@ -479,15 +479,15 @@ export default function HomeScreen({ onGetStarted, onHowItWorks, historyTick, ju
                   <Star size={32} className="text-success fill-success" />
                 </div>
                 <p className="font-semibold text-xl mb-1">Thank you for your feedback!</p>
-                <p className="text-sm text-muted-foreground dark:text-muted-foreground">Your rating helps us improve Smart Shoe Advisor.</p>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">Your rating helps us improve FootFit AI.</p>
               </div>
             ) : (
               <div className="text-center">
                 <div className="inline-flex items-center gap-2 glass px-3 py-1.5 rounded-full mb-4">
                   <Star size={14} className="text-warning fill-warning" />
-                  <span className="text-xs font-medium text-muted-foreground dark:text-muted-foreground">{userRating ? 'Update Your Rating' : 'Rate Smart Shoe Advisor'}</span>
+                  <span className="text-xs font-medium text-muted-foreground dark:text-muted-foreground">{userRating ? 'Update Your Rating' : 'Rate FootFit AI'}</span>
                 </div>
-                <h3 className="font-bold text-xl mb-1">{userRating ? 'Update your rating' : 'How would you rate Smart Shoe Advisor?'}</h3>
+                <h3 className="font-bold text-xl mb-1">{userRating ? 'Update your rating' : 'How would you rate FootFit AI?'}</h3>
                 <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-6">Your honest feedback helps us improve.</p>
                 <div className="flex items-center justify-center gap-2 mb-6">
                   {[1, 2, 3, 4, 5].map((s) => (
