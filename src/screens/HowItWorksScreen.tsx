@@ -75,7 +75,7 @@ export default function HowItWorksScreen({ onBack, onHome }: HowItWorksScreenPro
             <Brain size={16} className="text-primary" />
             <span className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">Under the Hood</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">How <span className="gradient-text">Smart Shoe Advisor</span> Works</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-3">How <span className="gradient-text">FootFit AI</span> Works</h1>
           <p className="text-muted-foreground dark:text-muted-foreground max-w-xl mx-auto">
             Seven computer-vision stages transform a simple photo into a precise foot measurement and personalized shoe recommendation — all in your browser.
           </p>

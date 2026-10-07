@@ -45,7 +45,7 @@ export default function InstallAppButton() {
       <Button
         onClick={handleClick}
         className="btn-ghost group w-fit flex items-center gap-2 text-xs"
-        aria-label="Download the Smart Shoe Advisor app"
+        aria-label="Download the FootFit AI app"
       >
         <Download size={20} className="text-primary group-hover:translate-y-0.5 transition-transform" />
         <span className="hidden sm:inline">Download App</span>
@@ -55,7 +55,7 @@ export default function InstallAppButton() {
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-overlay/50 p-4" onClick={() => setShowHelp(false)}>
           <div className="glass-card w-full max-w-sm p-6 rounded-lg" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between gap-4">
-              <h3 className="font-bold text-lg">Install Smart Shoe Advisor</h3>
+              <h3 className="font-bold text-lg">Install FootFit AI</h3>
               <Button onClick={() => setShowHelp(false)} aria-label="Close"><X size={20} /></Button>
             </div>
             <ol className="mt-4 space-y-3 text-sm text-muted-foreground dark:text-muted-foreground list-decimal list-inside">

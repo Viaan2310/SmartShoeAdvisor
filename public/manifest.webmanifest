@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Smart Shoe Advisor — Foot Scan & Shoe Fit",
-  "short_name": "Smart Shoe Advisor",
+  "name": "FootFit AI — Foot Scan & Shoe Fit",
+  "short_name": "FootFit AI",
   "description": "Scan your feet and get personalized shoe recommendations with exact UK/US/EU/IND sizing.",
   "lang": "en",
   "dir": "ltr",
