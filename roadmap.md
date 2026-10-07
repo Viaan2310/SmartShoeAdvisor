@@ -5,4 +5,4 @@
 
 ## FootFit AI branding
 - [x] Rename screens, installation details, metadata, shared results, and downloaded reports.
-- [ ] Verify the renamed app and absence of old branding.
+- [x] Verify the renamed app and absence of old branding.
