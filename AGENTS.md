@@ -13,3 +13,4 @@
 - Keep the existing screen state machine and analysis modules unchanged during presentation work, so recommendation behavior remains stable.
 - Use AdvisorButton as the shared shadcn-backed screen control and AdvisorHeader/AdvisorProgress for consistent navigation and flow state.
 - Define visual roles in src/styles.css with semantic OKLCH tokens; UI modules must reference those roles rather than palette literals.
+- Keep the exhibition sign-in layout in AuthScreen and reusable presentation styling in the global design system, so visual changes never alter authentication or recommendation behavior.

@@ -1,4 +1,5 @@
 # FootFit AI UI refresh
+- [ ] Apply the chosen Photographic Exhibition direction, graphite/silver tokens, and elegant typography.
 - [ ] Establish shared accessible design tokens and controls.
 - [ ] Refresh sign-in, home, upload, calibration, activity, loading, and results presentation.
 - [ ] Verify public controls, advisor presentation, and desktop/mobile layouts without changing recommendation logic.
