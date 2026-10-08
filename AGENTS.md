@@ -14,3 +14,4 @@
 - Use AdvisorButton as the shared shadcn-backed screen control and AdvisorHeader/AdvisorProgress for consistent navigation and flow state.
 - Define visual roles in src/styles.css with semantic OKLCH tokens; UI modules must reference those roles rather than palette literals.
 - Keep the exhibition sign-in layout in AuthScreen and reusable presentation styling in the global design system, so visual changes never alter authentication or recommendation behavior.
+- Render the shared logo from the approved logo asset and derive browser/install icons from its emblem, so all brand placements stay consistent.
