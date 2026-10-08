@@ -1,7 +1,7 @@
 import advisorShoe from '@/assets/advisor-shoe.jpg';
 import Button from '@/components/AdvisorButton';
 import { useState, type FormEvent } from 'react';
-import { Mail, Lock, ArrowRight, Footprints, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { useAuth } from '@/context/AuthContext';
 

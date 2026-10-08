@@ -291,6 +291,10 @@
 }
 
 /* Photographic Exhibition: open editorial composition, precise silver rules. */
+.auth-form-inner input { border-radius: 0; padding-left: 0; }
+.auth-form-inner .auth-mode > button { border-radius: 0; }
+.auth-form-inner .auth-mode > button[aria-pressed=true] { border-bottom-color: var(--primary); }
+.auth-form-inner .btn-primary { border-radius: 0; }
 @layer components {
  .brand-mark { border-radius: 3px; }
  .brand-name { font-family: var(--font-sans); font-size: 16px; font-weight: 700; }
