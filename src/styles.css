@@ -296,6 +296,10 @@
 .auth-form-inner .auth-mode > button[aria-pressed=true] { border-bottom-color: var(--primary); }
 .auth-form-inner .btn-primary { border-radius: 0; }
 @layer components {
+ .brand-signature { max-width: 100%; }
+ .brand-logo { display: block; width: 174px; height: auto; object-fit: contain; }
+ .brand-signature-sm .brand-logo { width: 146px; }
+ .brand-signature-lg .brand-logo { width: 212px; }
  .brand-mark { border-radius: 3px; }
  .brand-name { font-family: var(--font-sans); font-size: 16px; font-weight: 700; }
  .brand-name span { font-size: 9px; }
